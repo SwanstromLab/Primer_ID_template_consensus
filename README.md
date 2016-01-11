@@ -9,5 +9,6 @@ Input = directory of raw sequences of two ends (R1 and R2 fasta files)
 
 Require parameters:
 
-  Length of Primer ID
-  Primer Sequence of cDNA primer and 1st round PCR forward Primer
+    Length of Primer ID
+  
+    Primer Sequence of cDNA primer and 1st round PCR forward Primer
