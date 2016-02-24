@@ -5,6 +5,7 @@ RUBY Script to creat Primer ID tempalate consensus  from raw MiSeq fastq files
 
 #Version 1.10-24FEB2016
 Patch Notes:
+
     1. consensus cut-off calculation using average number of top 5 abundant Primer ID
     2. Add 'resampling indicator' = consensus without ambuiguities / all consensus including ambuiguities.
 
