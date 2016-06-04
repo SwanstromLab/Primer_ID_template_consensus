@@ -3,7 +3,7 @@ RUBY Script to creat Primer ID tempalate consensus  from raw MiSeq fastq files
 
 #Version 1.10-09302015
 
-#Version 1.10-24FEB2016
+#Version 1.11-24FEB2016
 Patch Notes:
 
     1. consensus cut-off calculation using average number of top 5 abundant Primer ID
