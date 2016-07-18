@@ -1,6 +1,11 @@
 # Primer ID Consensus
 RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files
 
+#Version 1.21-18JUL2016
+Patch Notes:
+
+    1.Allow ambituities of bases in the gene specific sequences. 
+
 #Version 1.20-05JUN2016
 Patch Notes:
 
