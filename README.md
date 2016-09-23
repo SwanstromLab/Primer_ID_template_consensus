@@ -1,6 +1,11 @@
 # Primer ID Consensus
 RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files
 
+#Version 1.30-23SEP2016
+Patch Notes:
+
+    1.Add Primer ID filter after consensus creation. Compare PID with sequences which have identical sequences. PIDs differ by 1 base will be recognized. If PID1 is x time greater than PID2, PID2 will be disgarded. PID factor x is 10 by default. 
+
 #Version 1.21-18JUL2016
 Patch Notes:
 
