@@ -1,17 +1,19 @@
 =begin
-Version 1.21-18JUL2016
+Version 1.31-14Nov2016
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.21-18JUL2016"
+ver = "1.31-14Nov2016"
 #############Patch Note#############
 =begin
-1.Now allow multiplexed Primer ID sequencing system. Input primers in pairs for all sets.
-2.Add option to ignore the 1st nucleotide of the Primer ID.
-3.Allow ambituities of bases in the gene specific sequences. 
+ADDING PRIMER ID FILTER AFTER CONCENSUS CREATION
+1. Compare PID with sequences which have identical sequences.
+2. PIDs differ by 1 base will be recognized. If PID1 is x time greater than PID2, PID2 will be disgarded
+3. PID factor x is 10 by default.
+4. PID filter only apply when the number of potential consensus sequences is less than 0.3% of the maximum capacity of PID. 
 =end
 
 
@@ -27,7 +29,7 @@ primers = {}
 primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC"]
 
 #ignore the first nucleotide of the PID, default value true
-$ignore_first_nt = true
+$ignore_first_nt = false
 
 #input file is the directory containing sequences from both ends of one library
 indir = ARGV[0]
@@ -205,6 +207,92 @@ module Enumerable
 
 end
 
+
+#compare PID with sequences which have identical sequences. 
+#PIDs differ by 1 base will be recognized. 
+#if PID1 is x time greater than PID2, PID2 will be disgarded
+
+def filter_similar_pid(sequence_hash = {}, cutoff = 10)
+  seq = sequence_hash
+  uni_seq = seq.values.uniq
+  uni_seq_pid = {}
+  uni_seq.each do |k|
+    seq.each do |name,s|
+      name = name[1..-1]
+      if k == s
+        if uni_seq_pid[k]
+          uni_seq_pid[k] << [name.split("_")[0],name.split("_")[1]]
+        else
+          uni_seq_pid[k] = []
+          uni_seq_pid[k] << [name.split("_")[0],name.split("_")[1]]
+        end
+      end
+    end 
+  end
+  
+  dup_pid = []
+  uni_seq_pid.values.each do |v|
+    next if v.size == 1
+    pid_hash = Hash[v]
+    list = pid_hash.keys
+    list2 = Array.new(list)
+    pairs = []
+  
+    list.each do |k|
+      list2.delete(k)
+      list2.each do |k1|
+        pairs << [k,k1]
+      end
+    end
+    
+    pairs.each do |p|
+      pid1 = p[0]
+      pid2 = p[1]
+      if two_pid_x_base_different(pid1,pid2,1)
+        n1 = pid_hash[pid1].to_i
+        n2 = pid_hash[pid2].to_i
+        if n1 >= cutoff * n2
+          dup_pid << pid2
+          #puts pid1 + "\t" + n1.to_s + "\t" + pid2 + "\t" + n2.to_s
+        elsif n2 >= cutoff * n1
+          dup_pid << pid1
+          #puts pid2 + "\t" + n2.to_s + "\t" + pid1 + "\t" + n1.to_s
+        end
+      end
+    end
+  end
+
+  new_seq = {}
+  seq.each do |name,s|
+    pid = name.split("_")[0][1..-1]
+    unless dup_pid.include?(pid)
+      new_seq[name] = s
+    end
+  end
+  return new_seq
+end
+
+#compare two primer ID sequences. If they differ in x base, return boolean value "TURE", else, return boolean value "FALSE"
+def two_pid_x_base_different(pid1="",pid2="", x=0)
+  l = pid1.size
+  m = l - x
+  n = 0
+  if pid1.size != pid2.size
+    return false
+  else
+    (0..(pid1.size - 1)).each do |k|
+      if pid1[k] == pid2[k]
+        n += 1
+      end
+    end
+    if n >= m
+      return true
+    else
+      return false
+    end
+  end
+end
+
 #####################End of General Methods
 
 #obtain files for two ends for the input directory
@@ -380,7 +468,7 @@ primers.each do |setname,primer_pair|
   
   paired_r2.each do |k,r2_seq|
     r1 = paired_r1[k]
-    id[k] = r2_seq[1,id_l]
+    id[k] = r2_seq[($ignore_first_nt ? 1 : 0),id_l]
     bio_id[k] = r2_seq[reverse_starting_number..-2]
     bio_non_id[k] = r1[forward_starting_number..-2]
     temp_file_out.print k+ "\n" + id[k] + "\n" + bio_id[k] + "\n"+bio_non_id[k] + "\n"
@@ -491,10 +579,33 @@ primers.each do |setname,primer_pair|
     consensus[consensus_name] = [consensus_id_part,consensus_non_id_part]
   end
   
-  n_con = consensus.size
+  consensus_filtered = {}
+  r1_consensus = {}
+  r2_consensus = {}
+  consensus.each do |seq_name,seq|
+    r1_consensus[seq_name] = seq[1]
+    r2_consensus[seq_name] = seq[0]
+  end
+  consensus_number_temp = consensus.size
+  
+  max_pid_comb = 4**id_l
+  
+  if consensus_number_temp < 0.003*max_pid_comb
+    puts "Applying PID post consensus filter..."
+    r1_consensus_filtered = filter_similar_pid(r1_consensus,10)
+    r2_consensus_filtered = filter_similar_pid(r2_consensus,10)
+    common_pid = r1_consensus_filtered.keys & r2_consensus_filtered.keys
+    common_pid.each do |pid|
+      consensus_filtered[pid] = [r2_consensus_filtered[pid],r1_consensus_filtered[pid]]
+    end
+  else
+    consensus_filtered = consensus
+  end
+  
+  n_con = consensus_filtered.size
   puts "Number of consensus sequences:\t" + n_con.to_s
   #output part 2
-  consensus.each do |seq_name,seq|
+  consensus_filtered.each do |seq_name,seq|
     f1.print seq_name + "_r2\n" + seq[0] + "\n"
     f2.print seq_name + "_r1\n" + seq[1] + "\n"
   end
@@ -555,5 +666,5 @@ primers.each do |setname,primer_pair|
   print `rm -rf #{temp_out}`
 end
 
-print `rm -rf #{r1_f}`
-print `rm -rf #{r2_f}`
+#print `rm -rf #{r1_f}`
+#print `rm -rf #{r2_f}`
