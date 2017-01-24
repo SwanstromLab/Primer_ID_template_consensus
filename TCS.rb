@@ -1,19 +1,16 @@
 =begin
-Version 1.31-14Nov2016
+TCS Pipeline Version 1.32-24JAN2017
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.31-14Nov2016"
+ver = "1.32-24JAN2017"
 #############Patch Note#############
 =begin
-ADDING PRIMER ID FILTER AFTER CONCENSUS CREATION
-1. Compare PID with sequences which have identical sequences.
-2. PIDs differ by 1 base will be recognized. If PID1 is x time greater than PID2, PID2 will be disgarded
-3. PID factor x is 10 by default.
-4. PID filter only apply when the number of potential consensus sequences is less than 0.3% of the maximum capacity of PID. 
+1. Adapted to TCS website
+2. Compress output directory in .tar.gz file
 =end
 
 
@@ -29,7 +26,7 @@ primers = {}
 primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC"]
 
 #ignore the first nucleotide of the PID, default value true
-$ignore_first_nt = false
+$ignore_first_nt = true
 
 #input file is the directory containing sequences from both ends of one library
 indir = ARGV[0]
@@ -306,15 +303,16 @@ end
 r1_f = ""
 r2_f = ""
 files.each do |f|
-  if f =~ /R1_001\.fastq/
+  if f =~ /r1/i
     r1_f = indir + "/" + f
-  elsif f =~ /R2_001\.fastq/
+  elsif f =~ /r2/i
     r2_f = indir + "/" + f
   end
 end
 
 t = Time.now
-outdir = indir + "/consensus_out" + "_" + t.year.to_s + "_" + t.month.to_s + "_" + t.day.to_s + "_" + t.hour.to_s + "_" + t.min.to_s
+#outdir = indir + "/consensus_out" + "_" + t.year.to_s + "_" + t.month.to_s + "_" + t.day.to_s + "_" + t.hour.to_s + "_" + t.min.to_s
+outdir = indir + "/output"
 Dir.mkdir(outdir) unless File.directory?(outdir)
 
 
@@ -666,5 +664,8 @@ primers.each do |setname,primer_pair|
   print `rm -rf #{temp_out}`
 end
 
+Dir.chdir(indir) {print `tar -czf output.tar.gz output`}
+
+print `rm -rf #{outdir}`
 #print `rm -rf #{r1_f}`
 #print `rm -rf #{r2_f}`
