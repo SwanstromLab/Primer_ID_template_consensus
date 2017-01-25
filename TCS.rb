@@ -17,16 +17,18 @@ ver = "1.32-24JAN2017"
 
 #############cDNA gene-specific region and forward primer region needs to be defined#######
 
-#mutilple cDNA primers
-primers = {}
+#mutilple cDNA primers, remove the # before use
+#primers = {}
 
 #change set_name, forward primer sequence and cDNA primer sequence. both forward primer sequence and cDNA primer sequence should include the entire sequence, not just biological sequence
 #primers["set_name"] = ["forward primer sequence", "cDNA primer sequence"]
-#example of primer 
-primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC"]
+#example of primer
 
-#ignore the first nucleotide of the PID, default value true
-$ignore_first_nt = true
+#primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC"]
+
+#ignore the first nucleotide of the PID, default value true, remove the # before use
+
+#$ignore_first_nt = true unless defined? $ignore_first_nt
 
 #input file is the directory containing sequences from both ends of one library
 indir = ARGV[0]
