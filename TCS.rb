@@ -669,5 +669,5 @@ end
 Dir.chdir(indir) {print `tar -czf output.tar.gz output`}
 
 print `rm -rf #{outdir}`
-#print `rm -rf #{r1_f}`
-#print `rm -rf #{r2_f}`
+print `rm -rf #{r1_f}`
+print `rm -rf #{r2_f}`
