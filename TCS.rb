@@ -510,9 +510,9 @@ primers.each do |setname,primer_pair|
 
   #output part 1
   out_dir_set = outdir + "/" + setname
-  Dir.mkdir(out_dir_set)
+  Dir.mkdir(out_dir_set) unless File.directory?(out_dir_set)
   out_dir_consensus = out_dir_set + "/consensus" 
-  Dir.mkdir(out_dir_consensus)
+  Dir.mkdir(out_dir_consensus) unless File.directory?(out_dir_consensus)
   
   outfile_id = out_dir_consensus + "/r2.txt"
   outfile_non_id = out_dir_consensus + "/r1.txt"
@@ -521,7 +521,7 @@ primers.each do |setname,primer_pair|
   f2 = File.open(outfile_non_id,'w')
   
   outdir_primer_id = out_dir_set + "/primer_id"
-  Dir.mkdir(outdir_primer_id)
+  Dir.mkdir(outdir_primer_id) unless File.directory?(outdir_primer_id)
   
   outfile_primer_id_count = outdir_primer_id + "/primer_id_count"
   outfile_primer_id_dis = outdir_primer_id + "/primer_id_dis"
