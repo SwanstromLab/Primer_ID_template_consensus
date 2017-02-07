@@ -666,7 +666,12 @@ primers.each do |setname,primer_pair|
   print `rm -rf #{temp_out}`
 end
 
-Dir.chdir(indir) {print `tar -czf output.tar.gz output`}
+Dir.chdir(indir) do
+  if File.exists?("output.tar.gz")
+    File.unlink("output.tar.gz")
+  end
+  print `tar -czf output.tar.gz output`
+end
 
 print `rm -rf #{outdir}`
 print `rm -rf #{r1_f}`
