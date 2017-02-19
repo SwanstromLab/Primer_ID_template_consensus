@@ -1,16 +1,15 @@
 =begin
-TCS Pipeline Version 1.32-24JAN2017
+TCS Pipeline Version 1.33-19FEB2017
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.32-24JAN2017"
+ver = "1.33-19FEB2017"
 #############Patch Note#############
 =begin
-1. Adapted to TCS website
-2. Compress output directory in .tar.gz file
+1. consensus cut-off model based on 3 levels of error rate (0.02, 0.01, 0.005). By default 0.02. 
 =end
 
 
@@ -55,7 +54,8 @@ def count(array)
   return hash
 end
 
-#calculate consensus cutoff, based on 8-nucleotide long
+#calculate consensus cutoff
+#error = 0.02
 def calculate_cut_off(m)
   n = 0
   if m <= 10
@@ -69,6 +69,36 @@ def calculate_cut_off(m)
   n = 2 if n < 3
   return n
 end
+
+=begin
+#error rate = 0.01
+def calculate_cut_off(m)
+  n = 0
+  if m <= 10
+    n = 2
+  else
+    n = 1.09*10**-26*m**6 + 7.82*10**-22*m**5 - 1.93*10**-16*m**4 + 1.01*10**-11*m**3 - 2.31*10**-7*m**2 + 0.00645*m + 2.872
+  end
+  n = n.round
+  n = 2 if n < 3
+  return n
+end
+=end
+
+=begin
+#error rate = 0.005
+def calculate_cut_off(m)
+  n = 0
+  if m <= 10
+    n = 2
+  else
+    n = -9.59*10**-27*m**6 + 3.27*10**-21*m**5 - 3.05*10**-16*m**4 + 1.2*10**-11*m**3 - 2.19*10**-7*m**2 + 0.004044*m + 2.273
+  end
+  n = n.round
+  n = 2 if n < 3
+  return n
+end
+=end
 
 #obtain a consensus sequences
 def consensus_without_alignment(seq_array,gap_treatment = 1)
