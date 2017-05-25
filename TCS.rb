@@ -344,7 +344,7 @@ end
 
 t = Time.now
 #outdir = indir + "/consensus_out" + "_" + t.year.to_s + "_" + t.month.to_s + "_" + t.day.to_s + "_" + t.hour.to_s + "_" + t.min.to_s
-outdir = indir + "/" + File.basename(indir,".*") + "_output"
+outdir = indir + "/output"
 Dir.mkdir(outdir) unless File.directory?(outdir)
 
 
@@ -696,12 +696,11 @@ primers.each do |setname,primer_pair|
   print `rm -rf #{temp_out}`
 end
 
-zip_file = outdir + ".tar.gz"
 Dir.chdir(indir) do
-  if File.exists?(zip_file)
-    File.unlink(zip_file)
+  if File.exists?("output.tar.gz")
+    File.unlink("output.tar.gz")
   end
-  print `tar -czf ${zip_file} ${outdir}`
+  print `tar -czf output.tar.gz output`
 end
 
 print `rm -rf #{outdir}`
