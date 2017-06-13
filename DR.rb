@@ -1,5 +1,6 @@
 =begin
-TCS Pipeline Version 1.32-24JAN2017 for HIV-1 Multiplexing Drug Resistance Tesing
+DR version 1.00-13JUN2017
+based on TCS Pipeline Version 1.33-19FEB2017 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, INT, V1/V3
 
@@ -9,12 +10,13 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.32-24JAN2017"
+ver = "1.00-13JUN2017 based on TCS 1.33-19FEB2017"
 #############Patch Note#############
 =begin
-1. Adapted to TCS website
-2. Compress output directory in .tar.gz file
+  1. sequence locator filter for regions.
+  2. PR r1 and r2 regions match need alignment. 
 =end
+
 
 #ignore the first nucleotide of the PID, default value true, remove the # before use
 
@@ -52,7 +54,8 @@ def count(array)
   return hash
 end
 
-#calculate consensus cutoff, based on 8-nucleotide long
+#calculate consensus cutoff
+#error rate = 0.02
 def calculate_cut_off(m)
   n = 0
   if m <= 10
@@ -66,6 +69,36 @@ def calculate_cut_off(m)
   n = 2 if n < 3
   return n
 end
+
+=begin
+#error rate = 0.01
+def calculate_cut_off(m)
+  n = 0
+  if m <= 10
+    n = 2
+  else
+    n = 1.09*10**-26*m**6 + 7.82*10**-22*m**5 - 1.93*10**-16*m**4 + 1.01*10**-11*m**3 - 2.31*10**-7*m**2 + 0.00645*m + 2.872
+  end
+  n = n.round
+  n = 2 if n < 3
+  return n
+end
+=end
+
+=begin
+#error rate = 0.005
+def calculate_cut_off(m)
+  n = 0
+  if m <= 10
+    n = 2
+  else
+    n = -9.59*10**-27*m**6 + 3.27*10**-21*m**5 - 3.05*10**-16*m**4 + 1.2*10**-11*m**3 - 2.19*10**-7*m**2 + 0.004044*m + 2.273
+  end
+  n = n.round
+  n = 2 if n < 3
+  return n
+end
+=end
 
 #obtain a consensus sequences
 def consensus_without_alignment(seq_array,gap_treatment = 1)
@@ -289,6 +322,190 @@ def two_pid_x_base_different(pid1="",pid2="", x=0)
   end
 end
 
+#sequence locator:
+#align with HXB2, return location, percentage of similarity
+def sequence_locator(seq="",temp_dir=File.dirname($0))
+  hxb2_ref = "TGGAAGGGCTAATTCACTCCCAACGAAGACAAGATATCCTTGATCTGTGGATCTACCACACACAAGGCTACTTCCCTGATTAGCAGAACTACACACCAGGGCCAGGGATCAGATATCCACTGACCTTTGGATGGTGCTACAAGCTAGTACCAGTTGAGCCAGAGAAGTTAGAAGAAGCCAACAAAGGAGAGAACACCAGCTTGTTACACCCTGTGAGCCTGCATGGAATGGATGACCCGGAGAGAGAAGTGTTAGAGTGGAGGTTTGACAGCCGCCTAGCATTTCATCACATGGCCCGAGAGCTGCATCCGGAGTACTTCAAGAACTGCTGACATCGAGCTTGCTACAAGGGACTTTCCGCTGGGGACTTTCCAGGGAGGCGTGGCCTGGGCGGGACTGGGGAGTGGCGAGCCCTCAGATCCTGCATATAAGCAGCTGCTTTTTGCCTGTACTGGGTCTCTCTGGTTAGACCAGATCTGAGCCTGGGAGCTCTCTGGCTAACTAGGGAACCCACTGCTTAAGCCTCAATAAAGCTTGCCTTGAGTGCTTCAAGTAGTGTGTGCCCGTCTGTTGTGTGACTCTGGTAACTAGAGATCCCTCAGACCCTTTTAGTCAGTGTGGAAAATCTCTAGCAGTGGCGCCCGAACAGGGACCTGAAAGCGAAAGGGAAACCAGAGGAGCTCTCTCGACGCAGGACTCGGCTTGCTGAAGCGCGCACGGCAAGAGGCGAGGGGCGGCGACTGGTGAGTACGCCAAAAATTTTGACTAGCGGAGGCTAGAAGGAGAGAGATGGGTGCGAGAGCGTCAGTATTAAGCGGGGGAGAATTAGATCGATGGGAAAAAATTCGGTTAAGGCCAGGGGGAAAGAAAAAATATAAATTAAAACATATAGTATGGGCAAGCAGGGAGCTAGAACGATTCGCAGTTAATCCTGGCCTGTTAGAAACATCAGAAGGCTGTAGACAAATACTGGGACAGCTACAACCATCCCTTCAGACAGGATCAGAAGAACTTAGATCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGGATAGAGATAAAAGACACCAAGGAAGCTTTAGACAAGATAGAGGAAGAGCAAAACAAAAGTAAGAAAAAAGCACAGCAAGCAGCAGCTGACACAGGACACAGCAATCAGGTCAGCCAAAATTACCCTATAGTGCAGAACATCCAGGGGCAAATGGTACATCAGGCCATATCACCTAGAACTTTAAATGCATGGGTAAAAGTAGTAGAAGAGAAGGCTTTCAGCCCAGAAGTGATACCCATGTTTTCAGCATTATCAGAAGGAGCCACCCCACAAGATTTAAACACCATGCTAAACACAGTGGGGGGACATCAAGCAGCCATGCAAATGTTAAAAGAGACCATCAATGAGGAAGCTGCAGAATGGGATAGAGTGCATCCAGTGCATGCAGGGCCTATTGCACCAGGCCAGATGAGAGAACCAAGGGGAAGTGACATAGCAGGAACTACTAGTACCCTTCAGGAACAAATAGGATGGATGACAAATAATCCACCTATCCCAGTAGGAGAAATTTATAAAAGATGGATAATCCTGGGATTAAATAAAATAGTAAGAATGTATAGCCCTACCAGCATTCTGGACATAAGACAAGGACCAAAGGAACCCTTTAGAGACTATGTAGACCGGTTCTATAAAACTCTAAGAGCCGAGCAAGCTTCACAGGAGGTAAAAAATTGGATGACAGAAACCTTGTTGGTCCAAAATGCGAACCCAGATTGTAAGACTATTTTAAAAGCATTGGGACCAGCGGCTACACTAGAAGAAATGATGACAGCATGTCAGGGAGTAGGAGGACCCGGCCATAAGGCAAGAGTTTTGGCTGAAGCAATGAGCCAAGTAACAAATTCAGCTACCATAATGATGCAGAGAGGCAATTTTAGGAACCAAAGAAAGATTGTTAAGTGTTTCAATTGTGGCAAAGAAGGGCACACAGCCAGAAATTGCAGGGCCCCTAGGAAAAAGGGCTGTTGGAAATGTGGAAAGGAAGGACACCAAATGAAAGATTGTACTGAGAGACAGGCTAATTTTTTAGGGAAGATCTGGCCTTCCTACAAGGGAAGGCCAGGGAATTTTCTTCAGAGCAGACCAGAGCCAACAGCCCCACCAGAAGAGAGCTTCAGGTCTGGGGTAGAGACAACAACTCCCCCTCAGAAGCAGGAGCCGATAGACAAGGAACTGTATCCTTTAACTTCCCTCAGGTCACTCTTTGGCAACGACCCCTCGTCACAATAAAGATAGGGGGGCAACTAAAGGAAGCTCTATTAGATACAGGAGCAGATGATACAGTATTAGAAGAAATGAGTTTGCCAGGAAGATGGAAACCAAAAATGATAGGGGGAATTGGAGGTTTTATCAAAGTAAGACAGTATGATCAGATACTCATAGAAATCTGTGGACATAAAGCTATAGGTACAGTATTAGTAGGACCTACACCTGTCAACATAATTGGAAGAAATCTGTTGACTCAGATTGGTTGCACTTTAAATTTTCCCATTAGCCCTATTGAGACTGTACCAGTAAAATTAAAGCCAGGAATGGATGGCCCAAAAGTTAAACAATGGCCATTGACAGAAGAAAAAATAAAAGCATTAGTAGAAATTTGTACAGAGATGGAAAAGGAAGGGAAAATTTCAAAAATTGGGCCTGAAAATCCATACAATACTCCAGTATTTGCCATAAAGAAAAAAGACAGTACTAAATGGAGAAAATTAGTAGATTTCAGAGAACTTAATAAGAGAACTCAAGACTTCTGGGAAGTTCAATTAGGAATACCACATCCCGCAGGGTTAAAAAAGAAAAAATCAGTAACAGTACTGGATGTGGGTGATGCATATTTTTCAGTTCCCTTAGATGAAGACTTCAGGAAGTATACTGCATTTACCATACCTAGTATAAACAATGAGACACCAGGGATTAGATATCAGTACAATGTGCTTCCACAGGGATGGAAAGGATCACCAGCAATATTCCAAAGTAGCATGACAAAAATCTTAGAGCCTTTTAGAAAACAAAATCCAGACATAGTTATCTATCAATACATGGATGATTTGTATGTAGGATCTGACTTAGAAATAGGGCAGCATAGAACAAAAATAGAGGAGCTGAGACAACATCTGTTGAGGTGGGGACTTACCACACCAGACAAAAAACATCAGAAAGAACCTCCATTCCTTTGGATGGGTTATGAACTCCATCCTGATAAATGGACAGTACAGCCTATAGTGCTGCCAGAAAAAGACAGCTGGACTGTCAATGACATACAGAAGTTAGTGGGGAAATTGAATTGGGCAAGTCAGATTTACCCAGGGATTAAAGTAAGGCAATTATGTAAACTCCTTAGAGGAACCAAAGCACTAACAGAAGTAATACCACTAACAGAAGAAGCAGAGCTAGAACTGGCAGAAAACAGAGAGATTCTAAAAGAACCAGTACATGGAGTGTATTATGACCCATCAAAAGACTTAATAGCAGAAATACAGAAGCAGGGGCAAGGCCAATGGACATATCAAATTTATCAAGAGCCATTTAAAAATCTGAAAACAGGAAAATATGCAAGAATGAGGGGTGCCCACACTAATGATGTAAAACAATTAACAGAGGCAGTGCAAAAAATAACCACAGAAAGCATAGTAATATGGGGAAAGACTCCTAAATTTAAACTGCCCATACAAAAGGAAACATGGGAAACATGGTGGACAGAGTATTGGCAAGCCACCTGGATTCCTGAGTGGGAGTTTGTTAATACCCCTCCCTTAGTGAAATTATGGTACCAGTTAGAGAAAGAACCCATAGTAGGAGCAGAAACCTTCTATGTAGATGGGGCAGCTAACAGGGAGACTAAATTAGGAAAAGCAGGATATGTTACTAATAGAGGAAGACAAAAAGTTGTCACCCTAACTGACACAACAAATCAGAAGACTGAGTTACAAGCAATTTATCTAGCTTTGCAGGATTCGGGATTAGAAGTAAACATAGTAACAGACTCACAATATGCATTAGGAATCATTCAAGCACAACCAGATCAAAGTGAATCAGAGTTAGTCAATCAAATAATAGAGCAGTTAATAAAAAAGGAAAAGGTCTATCTGGCATGGGTACCAGCACACAAAGGAATTGGAGGAAATGAACAAGTAGATAAATTAGTCAGTGCTGGAATCAGGAAAGTACTATTTTTAGATGGAATAGATAAGGCCCAAGATGAACATGAGAAATATCACAGTAATTGGAGAGCAATGGCTAGTGATTTTAACCTGCCACCTGTAGTAGCAAAAGAAATAGTAGCCAGCTGTGATAAATGTCAGCTAAAAGGAGAAGCCATGCATGGACAAGTAGACTGTAGTCCAGGAATATGGCAACTAGATTGTACACATTTAGAAGGAAAAGTTATCCTGGTAGCAGTTCATGTAGCCAGTGGATATATAGAAGCAGAAGTTATTCCAGCAGAAACAGGGCAGGAAACAGCATATTTTCTTTTAAAATTAGCAGGAAGATGGCCAGTAAAAACAATACATACTGACAATGGCAGCAATTTCACCGGTGCTACGGTTAGGGCCGCCTGTTGGTGGGCGGGAATCAAGCAGGAATTTGGAATTCCCTACAATCCCCAAAGTCAAGGAGTAGTAGAATCTATGAATAAAGAATTAAAGAAAATTATAGGACAGGTAAGAGATCAGGCTGAACATCTTAAGACAGCAGTACAAATGGCAGTATTCATCCACAATTTTAAAAGAAAAGGGGGGATTGGGGGGTACAGTGCAGGGGAAAGAATAGTAGACATAATAGCAACAGACATACAAACTAAAGAATTACAAAAACAAATTACAAAAATTCAAAATTTTCGGGTTTATTACAGGGACAGCAGAAATCCACTTTGGAAAGGACCAGCAAAGCTCCTCTGGAAAGGTGAAGGGGCAGTAGTAATACAAGATAATAGTGACATAAAAGTAGTGCCAAGAAGAAAAGCAAAGATCATTAGGGATTATGGAAAACAGATGGCAGGTGATGATTGTGTGGCAAGTAGACAGGATGAGGATTAGAACATGGAAAAGTTTAGTAAAACACCATATGTATGTTTCAGGGAAAGCTAGGGGATGGTTTTATAGACATCACTATGAAAGCCCTCATCCAAGAATAAGTTCAGAAGTACACATCCCACTAGGGGATGCTAGATTGGTAATAACAACATATTGGGGTCTGCATACAGGAGAAAGAGACTGGCATTTGGGTCAGGGAGTCTCCATAGAATGGAGGAAAAAGAGATATAGCACACAAGTAGACCCTGAACTAGCAGACCAACTAATTCATCTGTATTACTTTGACTGTTTTTCAGACTCTGCTATAAGAAAGGCCTTATTAGGACACATAGTTAGCCCTAGGTGTGAATATCAAGCAGGACATAACAAGGTAGGATCTCTACAATACTTGGCACTAGCAGCATTAATAACACCAAAAAAGATAAAGCCACCTTTGCCTAGTGTTACGAAACTGACAGAGGATAGATGGAACAAGCCCCAGAAGACCAAGGGCCACAGAGGGAGCCACACAATGAATGGACACTAGAGCTTTTAGAGGAGCTTAAGAATGAAGCTGTTAGACATTTTCCTAGGATTTGGCTCCATGGCTTAGGGCAACATATCTATGAAACTTATGGGGATACTTGGGCAGGAGTGGAAGCCATAATAAGAATTCTGCAACAACTGCTGTTTATCCATTTTCAGAATTGGGTGTCGACATAGCAGAATAGGCGTTACTCGACAGAGGAGAGCAAGAAATGGAGCCAGTAGATCCTAGACTAGAGCCCTGGAAGCATCCAGGAAGTCAGCCTAAAACTGCTTGTACCAATTGCTATTGTAAAAAGTGTTGCTTTCATTGCCAAGTTTGTTTCATAACAAAAGCCTTAGGCATCTCCTATGGCAGGAAGAAGCGGAGACAGCGACGAAGAGCTCATCAGAACAGTCAGACTCATCAAGCTTCTCTATCAAAGCAGTAAGTAGTACATGTAACGCAACCTATACCAATAGTAGCAATAGTAGCATTAGTAGTAGCAATAATAATAGCAATAGTTGTGTGGTCCATAGTAATCATAGAATATAGGAAAATATTAAGACAAAGAAAAATAGACAGGTTAATTGATAGACTAATAGAAAGAGCAGAAGACAGTGGCAATGAGAGTGAAGGAGAAATATCAGCACTTGTGGAGATGGGGGTGGAGATGGGGCACCATGCTCCTTGGGATGTTGATGATCTGTAGTGCTACAGAAAAATTGTGGGTCACAGTCTATTATGGGGTACCTGTGTGGAAGGAAGCAACCACCACTCTATTTTGTGCATCAGATGCTAAAGCATATGATACAGAGGTACATAATGTTTGGGCCACACATGCCTGTGTACCCACAGACCCCAACCCACAAGAAGTAGTATTGGTAAATGTGACAGAAAATTTTAACATGTGGAAAAATGACATGGTAGAACAGATGCATGAGGATATAATCAGTTTATGGGATCAAAGCCTAAAGCCATGTGTAAAATTAACCCCACTCTGTGTTAGTTTAAAGTGCACTGATTTGAAGAATGATACTAATACCAATAGTAGTAGCGGGAGAATGATAATGGAGAAAGGAGAGATAAAAAACTGCTCTTTCAATATCAGCACAAGCATAAGAGGTAAGGTGCAGAAAGAATATGCATTTTTTTATAAACTTGATATAATACCAATAGATAATGATACTACCAGCTATAAGTTGACAAGTTGTAACACCTCAGTCATTACACAGGCCTGTCCAAAGGTATCCTTTGAGCCAATTCCCATACATTATTGTGCCCCGGCTGGTTTTGCGATTCTAAAATGTAATAATAAGACGTTCAATGGAACAGGACCATGTACAAATGTCAGCACAGTACAATGTACACATGGAATTAGGCCAGTAGTATCAACTCAACTGCTGTTAAATGGCAGTCTAGCAGAAGAAGAGGTAGTAATTAGATCTGTCAATTTCACGGACAATGCTAAAACCATAATAGTACAGCTGAACACATCTGTAGAAATTAATTGTACAAGACCCAACAACAATACAAGAAAAAGAATCCGTATCCAGAGAGGACCAGGGAGAGCATTTGTTACAATAGGAAAAATAGGAAATATGAGACAAGCACATTGTAACATTAGTAGAGCAAAATGGAATAACACTTTAAAACAGATAGCTAGCAAATTAAGAGAACAATTTGGAAATAATAAAACAATAATCTTTAAGCAATCCTCAGGAGGGGACCCAGAAATTGTAACGCACAGTTTTAATTGTGGAGGGGAATTTTTCTACTGTAATTCAACACAACTGTTTAATAGTACTTGGTTTAATAGTACTTGGAGTACTGAAGGGTCAAATAACACTGAAGGAAGTGACACAATCACCCTCCCATGCAGAATAAAACAAATTATAAACATGTGGCAGAAAGTAGGAAAAGCAATGTATGCCCCTCCCATCAGTGGACAAATTAGATGTTCATCAAATATTACAGGGCTGCTATTAACAAGAGATGGTGGTAATAGCAACAATGAGTCCGAGATCTTCAGACCTGGAGGAGGAGATATGAGGGACAATTGGAGAAGTGAATTATATAAATATAAAGTAGTAAAAATTGAACCATTAGGAGTAGCACCCACCAAGGCAAAGAGAAGAGTGGTGCAGAGAGAAAAAAGAGCAGTGGGAATAGGAGCTTTGTTCCTTGGGTTCTTGGGAGCAGCAGGAAGCACTATGGGCGCAGCCTCAATGACGCTGACGGTACAGGCCAGACAATTATTGTCTGGTATAGTGCAGCAGCAGAACAATTTGCTGAGGGCTATTGAGGCGCAACAGCATCTGTTGCAACTCACAGTCTGGGGCATCAAGCAGCTCCAGGCAAGAATCCTGGCTGTGGAAAGATACCTAAAGGATCAACAGCTCCTGGGGATTTGGGGTTGCTCTGGAAAACTCATTTGCACCACTGCTGTGCCTTGGAATGCTAGTTGGAGTAATAAATCTCTGGAACAGATTTGGAATCACACGACCTGGATGGAGTGGGACAGAGAAATTAACAATTACACAAGCTTAATACACTCCTTAATTGAAGAATCGCAAAACCAGCAAGAAAAGAATGAACAAGAATTATTGGAATTAGATAAATGGGCAAGTTTGTGGAATTGGTTTAACATAACAAATTGGCTGTGGTATATAAAATTATTCATAATGATAGTAGGAGGCTTGGTAGGTTTAAGAATAGTTTTTGCTGTACTTTCTATAGTGAATAGAGTTAGGCAGGGATATTCACCATTATCGTTTCAGACCCACCTCCCAACCCCGAGGGGACCCGACAGGCCCGAAGGAATAGAAGAAGAAGGTGGAGAGAGAGACAGAGACAGATCCATTCGATTAGTGAACGGATCCTTGGCACTTATCTGGGACGATCTGCGGAGCCTGTGCCTCTTCAGCTACCACCGCTTGAGAGACTTACTCTTGATTGTAACGAGGATTGTGGAACTTCTGGGACGCAGGGGGTGGGAAGCCCTCAAATATTGGTGGAATCTCCTACAGTATTGGAGTCAGGAACTAAAGAATAGTGCTGTTAGCTTGCTCAATGCCACAGCCATAGCAGTAGCTGAGGGGACAGATAGGGTTATAGAAGTAGTACAAGGAGCTTGTAGAGCTATTCGCCACATACCTAGAAGAATAAGACAGGGCTTGGAAAGGATTTTGCTATAAGATGGGTGGCAAGTGGTCAAAAAGTAGTGTGATTGGATGGCCTACTGTAAGGGAAAGAATGAGACGAGCTGAGCCAGCAGCAGATAGGGTGGGAGCAGCATCTCGAGACCTGGAAAAACATGGAGCAATCACAAGTAGCAATACAGCAGCTACCAATGCTGCTTGTGCCTGGCTAGAAGCACAAGAGGAGGAGGAGGTGGGTTTTCCAGTCACACCTCAGGTACCTTTAAGACCAATGACTTACAAGGCAGCTGTAGATCTTAGCCACTTTTTAAAAGAAAAGGGGGGACTGGAAGGGCTAATTCACTCCCAAAGAAGACAAGATATCCTTGATCTGTGGATCTACCACACACAAGGCTACTTCCCTGATTAGCAGAACTACACACCAGGGCCAGGGGTCAGATATCCACTGACCTTTGGATGGTGCTACAAGCTAGTACCAGTTGAGCCAGATAAGATAGAAGAGGCCAATAAAGGAGAGAACACCAGCTTGTTACACCCTGTGAGCCTGCATGGGATGGATGACCCGGAGAGAGAAGTGTTAGAGTGGAGGTTTGACAGCCGCCTAGCATTTCATCACGTGGCCCGAGAGCTGCATCCGGAGTACTTCAAGAACTGCTGACATCGAGCTTGCTACAAGGGACTTTCCGCTGGGGACTTTCCAGGGAGGCGTGGCCTGGGCGGGACTGGGGAGTGGCGAGCCCTCAGATCCTGCATATAAGCAGCTGCTTTTTGCCTGTACTGGGTCTCTCTGGTTAGACCAGATCTGAGCCTGGGAGCTCTCTGGCTAACTAGGGAACCCACTGCTTAAGCCTCAATAAAGCTTGCCTTGAGTGCTTCAAGTAGTGTGTGCCCGTCTGTTGTGTGACTCTGGTAACTAGAGATCCCTCAGACCCTTTTAGTCAGTGTGGAAAATCTCTAGCA"
+  hxb2_l = hxb2_ref.size
+  temp_file = temp_dir + "/temp"
+  temp_aln = temp_dir + "/temp_aln"
+  
+  l1 = 0
+  l2 = 0
+  name = ">test"
+  temp_in = File.open(temp_file,"w")
+  temp_in.puts ">ref"
+  temp_in.puts hxb2_ref
+  temp_in.puts name
+  temp_in.puts seq
+  temp_in.close
+  
+  print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+  aln_seq = fasta_to_hash(temp_aln)
+  aln_test = aln_seq[name]
+  aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
+  gap_begin = $1.size
+  gap_end = $3.size
+  aln_test2 = $2
+  ref = aln_seq[">ref"]
+  ref = ref[gap_begin..(-gap_end-1)]
+  ref_size = ref.size
+  if ref_size > 1.3*(seq.size)
+    l1 = l1 + gap_begin
+    l2 = l2 + gap_end
+    max_seq = aln_test2.scan(/[ACGT]+/).max_by(&:length)
+    aln_test2 =~ /#{max_seq}/
+    before_aln_seq = $`
+    before_aln = $`.size
+    post_aln_seq = $'
+    post_aln = $'.size
+    before_aln_seq_size = before_aln_seq.scan(/[ACGT]+/).join("").size
+    b1 = (1.3 * before_aln_seq_size).to_i
+    post_aln_seq_size = post_aln_seq.scan(/[ACGT]+/).join("").size
+    b2 = (1.3 * post_aln_seq_size).to_i
+    if (before_aln > seq.size) and (post_aln <= seq.size)
+      ref = ref[(before_aln - b1)..(ref_size - post_aln - 1)]
+      l1 = l1 + (before_aln - b1)
+    elsif (post_aln > seq.size) and (before_aln <= seq.size)
+      ref = ref[before_aln..(ref_size - post_aln - 1 + b2)]
+      l2 = l2 + post_aln - b2
+    elsif (post_aln > seq.size) and (before_aln > seq.size)
+      ref = ref[(before_aln - b1)..(ref_size - post_aln - 1 + b2)]
+      l1 = l1 + (before_aln - b1)
+      l2 = l2 + (post_aln - b2)
+    end
+    temp_in = File.open(temp_file,"w")
+    temp_in.puts ">ref"
+    temp_in.puts ref
+    temp_in.puts name
+    temp_in.puts seq
+    temp_in.close
+    print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+    aln_seq = fasta_to_hash(temp_aln)
+    aln_test = aln_seq[name]
+    aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
+    gap_begin = $1.size
+    gap_end = $3.size
+    aln_test2 = $2
+    ref = aln_seq[">ref"]
+    ref = ref[gap_begin..(-gap_end-1)]
+    ref_size = ref.size
+  end
+  aln_seq = fasta_to_hash(temp_aln)
+  aln_test = aln_seq[name]
+  aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
+  gap_begin = $1.size
+  gap_end = $3.size
+  aln_test = $2
+  aln_test =~ /^(\w+)(\-*)\w/
+  s1 = $1.size
+  g1 = $2.size
+  aln_test =~ /\w(\-*)(\w+)$/
+  s2 = $2.size
+  g2 = $1.size
+  ref = aln_seq[">ref"]
+  ref = ref[gap_begin..(-gap_end-1)]
+
+  l1 = l1 + gap_begin
+  l2 = l2 + gap_end
+  repeat = 0
+  
+  if g1 == g2 and (s1 + g1 + s2) == ref.size
+    if s1 > s2 and g2 > 2*s2
+      ref = ref[0..(-g2-1)]
+      repeat = 1
+      l2 = l2 + g2
+    elsif s1 < s2 and g1 > 2*s1
+      ref = ref[g1..-1]
+      repeat = 1
+      l1 = l1 + g1
+    end
+  else
+    if g1 > 2*s1
+      ref = ref[g1..-1]
+      repeat = 1
+      l1 = l1 + g1
+    end
+    if g2 > 2*s2
+      ref = ref[0..(-g2 - 1)]
+      repeat = 1
+      l2 = l2 + g2
+    end 
+  end
+
+  while repeat == 1
+    temp_in = File.open(temp_file,"w")
+    temp_in.puts ">ref"
+    temp_in.puts ref
+    temp_in.puts name
+    temp_in.puts seq
+    temp_in.close
+    print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+    aln_seq = fasta_to_hash(temp_aln)
+    aln_test = aln_seq[name]
+    aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
+    gap_begin = $1.size
+    gap_end = $3.size
+    aln_test = $2
+    aln_test =~ /^(\w+)(\-*)\w/
+    s1 = $1.size
+    g1 = $2.size
+    aln_test =~ /\w(\-*)(\w+)$/
+    s2 = $2.size
+    g2 = $1.size
+    ref = aln_seq[">ref"]
+    ref = ref[gap_begin..(-gap_end-1)]
+    l1 = l1 + gap_begin
+    l2 = l2 + gap_end
+    repeat = 0
+    if g1 > 2*s1
+      ref = ref[g1..-1]
+      repeat = 1
+      l1 = l1 + g1
+    end
+    if g2 > 2*s2
+      ref = ref[0..(-g2 - 1)]
+      repeat = 1
+      l2 = l2 + g2
+    end
+  end
+  aln_seq = fasta_to_hash(temp_aln)
+  aln_test = aln_seq[name]
+  aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
+  gap_begin = $1.size
+  gap_end = $3.size
+  aln_test2 = $2
+  ref = aln_seq[">ref"]
+  ref = ref[gap_begin..(-gap_end-1)]
+  ref_size = ref.size
+  sim_count = 0
+  (0..(ref_size-1)).each do |n|
+    ref_base = ref[n]
+    test_base = aln_test2[n]
+    sim_count += 1 if ref_base == test_base
+  end
+  similarity = (sim_count/ref_size.to_f*100).round(1)
+  print `rm -f #{temp_file}`
+  print `rm -f #{temp_aln}`
+  return [(l1+1),(hxb2_l-l2),similarity]
+end
+
+def fasta_to_hash(infile)
+  f=File.open(infile,"r")
+  return_hash = {}
+  name = ""
+  while line = f.gets do
+    if line =~ /^\>/
+      name = line.chomp
+      return_hash[name] = ""
+    else
+      return_hash[name] += line.chomp
+    end
+  end
+  f.close
+  return return_hash
+end
+
 #####################End of General Methods
 
 #obtain files for two ends for the input directory
@@ -311,7 +528,7 @@ end
 
 t = Time.now
 #outdir = indir + "/consensus_out" + "_" + t.year.to_s + "_" + t.month.to_s + "_" + t.day.to_s + "_" + t.hour.to_s + "_" + t.min.to_s
-outdir = indir + "/output"
+outdir = indir + "/" + File.basename(indir)
 Dir.mkdir(outdir) unless File.directory?(outdir)
 
 
@@ -513,9 +730,11 @@ primers.each do |setname,primer_pair|
   
   outfile_id = out_dir_consensus + "/r2.txt"
   outfile_non_id = out_dir_consensus + "/r1.txt"
+  outfile_combined = out_dir_consensus + "/combined.txt"
   
   f1 = File.open(outfile_id,'w')
   f2 = File.open(outfile_non_id,'w')
+  f6 = File.open(outfile_combined,'w')
   
   outdir_primer_id = out_dir_set + "/primer_id"
   Dir.mkdir(outdir_primer_id) unless File.directory?(outdir_primer_id)
@@ -601,11 +820,115 @@ primers.each do |setname,primer_pair|
   
   n_con = consensus_filtered.size
   puts "Number of consensus sequences:\t" + n_con.to_s
-  #output part 2
+  #output part 3
+  
+  r1 = {}
+  r2 = {}
   consensus_filtered.each do |seq_name,seq|
+    r1[seq_name] = seq[1]
+    r2[seq_name] = seq[0]
     f1.print seq_name + "_r2\n" + seq[0] + "\n"
     f2.print seq_name + "_r1\n" + seq[1] + "\n"
   end
+  
+  r1_seq_uni = r1.values.uniq
+  r2_seq_uni = r2.values.uniq
+  r1_uni_pass = []
+  r2_uni_pass = []
+  r1_seq_uni.each do |k|
+    loc = sequence_locator(k,temp_out)
+    case setname
+    when "RT"
+      next if loc[3]
+      if (loc[0] == 2648) and (loc[1] == 2914)
+        r1_uni_pass << k
+      end
+    when "PR"
+      if (loc[0] < 2253) and (loc[1] > 2253)
+        r1_uni_pass << k
+      end 
+    when "INT"
+      next if loc[3]
+      if (loc[0] == 4384) and (loc[1] == 4658)
+        r1_uni_pass << k
+      end 
+    when "V1V3"
+      if loc[0] == 6585
+        r1_uni_pass << k
+      end
+    end
+  end
+  r2_seq_uni.each do |k|
+    loc = sequence_locator(k,temp_out)
+    case setname
+    when "RT"
+      next if loc[3]
+      if (loc[0] == 3001) and (loc[1] == 3257)
+        r2_uni_pass << k
+      end
+    when "PR"
+      next if loc[3]
+      if (loc[0] == 2329) and (loc[1] == 2591)
+        r2_uni_pass << k
+      end      
+    when "INT"
+      next if loc[3]
+      if (loc[0] == 4488) and (loc[1] == 4751)
+        r2_uni_pass << k
+      end      
+    when "V1V3"
+      if loc[1] == 7208
+        r2_uni_pass << k
+      end
+    end
+    
+  end
+  r1_pass = {}
+  r1_uni_pass.each do |seq|
+    r1.each do |k,v|
+      if v == seq
+        r1_pass[k] = v
+      end
+    end
+  end
+  r2_pass = {}
+  r2_uni_pass.each do |seq|
+    r2.each do |k,v|
+      if v == seq
+        r2_pass[k] = v
+      end
+    end
+  end
+  r1_pass_size = r1_pass.size
+  r2_pass_size = r2_pass.size
+  
+  combined_k = r1_pass.keys & r2_pass.keys
+  combined_seq = {}
+  
+  combined_k.each do |k|
+    case setname
+    when /V1V3|RT/
+      s = r1_pass[k] + r2_pass[k]
+      combined_seq[k] = s
+    when "PR"
+      r1s = r1_pass[k]
+      r2s = r2_pass[k]
+      loc_r1 = sequence_locator(r1,temp_out)
+      x = loc_r1[1]
+      s = r1s[-(x-2252)..-1] + r2s[(x-2328),(2549-x)]
+      next unless s
+      combined_seq[k] = s
+    when "INT"
+      s = r1_pass[k] + r2_pass[k][171..-1]
+      next unless s
+      combined_seq[k] = s
+    end
+    f6.puts k + "_combined"
+    f6.puts s
+  end
+  f6.close
+  combined_size = combined_seq.size
+  print "Number of combined sequences: #{combined_size}\n"
   
   f1.close
   f2.close
@@ -623,7 +946,7 @@ primers.each do |setname,primer_pair|
   
   log_f = File.open(log,'w')
   
-  log_f.print "Primer ID pair-end consensus creator Version #{ver}\n\n"
+  log_f.print "TCS-DR pipeline #{ver}\n\n"
   
   log_f.print "Primer ID pair-end consensus creator\n\n"
   
@@ -654,6 +977,12 @@ primers.each do |setname,primer_pair|
 
   log_f.print "Resampling Parameter is #{(n_con/nn.to_f).round(3)}\n\n"
   
+  log_f.print "R1 Location filter: #{r1_pass_size}\n\n"
+
+  log_f.print "R2 Location filter: #{r2_pass_size}\n\n"
+
+  log_f.print "The number of combined sequences is #{combined_size}\n\n"
+  
   if distinct_to_raw > 0.1
     log_f.print "WARNING: NOT ENOUGH RAW SEQUENCES, SAMPLING DEPTH MAY NOT BE REVEALED!!!"
     print "\t\t\t****************************\nWARNING: NOT ENOUGH RAW SEQUENCES, SAMPLING DEPTH MAY NOT BE REVEALED!!!\n\t\t\t****************************\n"
@@ -663,12 +992,12 @@ primers.each do |setname,primer_pair|
   print `rm -rf #{temp_out}`
 end
 
-Dir.chdir(indir) do
-  if File.exists?("output.tar.gz")
-    File.unlink("output.tar.gz")
-  end
-  print `tar -czf output.tar.gz output`
+outdir_tar = outdir + ".tar.gz"
+
+if File.exists?(outdir_tar)
+  File.unlink(outdir_tar)
 end
+Dir.chdir(indir) {print `tar -czf #{File.basename(outdir_tar)} #{File.basename(outdir)}`}
 
 print `rm -rf #{outdir}`
 print `rm -rf #{r1_f}`
