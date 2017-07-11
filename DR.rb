@@ -913,7 +913,7 @@ primers.each do |setname,primer_pair|
     when "PR"
       r1s = r1_pass[k]
       r2s = r2_pass[k]
-      loc_r1 = sequence_locator(r1,temp_out)
+      loc_r1 = sequence_locator(r1s,temp_out)
       x = loc_r1[1]
       s = r1s[-(x-2252)..-1] + r2s[(x-2328),(2549-x)]
       next unless s
