@@ -32,6 +32,8 @@ primers["PR"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTCAGAGCAGACCAGAGCCAA
 #input file is the directory containing sequences from both ends of one library
 indir = ARGV[0]
 
+muscledir = "/nas02/apps/muscle-3.8.31/bin/muscle"
+
 #####################General Methods
 
 #convert array to hash in a memory-saving way
@@ -340,7 +342,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   temp_in.puts seq
   temp_in.close
   
-  print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+  print `#{muscledir} -in #{temp_file} -out #{temp_aln} -quiet`
   aln_seq = fasta_to_hash(temp_aln)
   aln_test = aln_seq[name]
   aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
@@ -380,7 +382,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     temp_in.puts name
     temp_in.puts seq
     temp_in.close
-    print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+    print `#{muscledir} -in #{temp_file} -out #{temp_aln} -quiet`
     aln_seq = fasta_to_hash(temp_aln)
     aln_test = aln_seq[name]
     aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
@@ -440,7 +442,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     temp_in.puts name
     temp_in.puts seq
     temp_in.close
-    print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+    print `#{muscledir} -in #{temp_file} -out #{temp_aln} -quiet`
     aln_seq = fasta_to_hash(temp_aln)
     aln_test = aln_seq[name]
     aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
