@@ -10,11 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.00-13JUN2017 based on TCS 1.33-19FEB2017"
+ver = "1.01-21SEP2017 based on TCS 1.33-19FEB2017"
 #############Patch Note#############
 =begin
-  1. sequence locator filter for regions.
-  2. PR r1 and r2 regions match need alignment. 
+  1. Post consensus filter improved for PR region. 
 =end
 
 
@@ -490,7 +489,10 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   similarity = (sim_count/ref_size.to_f*100).round(1)
   print `rm -f #{temp_file}`
   print `rm -f #{temp_aln}`
-  return [(l1+1),(hxb2_l-l2),similarity]
+  loc_p1 = l1 + 1
+  loc_p2 = hxb2_l - l2
+  indel = true unless seq.size == (loc_p2 - loc_p1 + 1)
+  return [loc_p1,loc_p2,similarity,indel,aln_test2]
 end
 
 def fasta_to_hash(infile)
@@ -847,7 +849,7 @@ primers.each do |setname,primer_pair|
         r1_uni_pass << k
       end
     when "PR"
-      if (loc[0] < 2253) and (loc[1] > 2253)
+      if (loc[0] < 2253) and (loc[1] > 2329)
         r1_uni_pass << k
       end 
     when "INT"
@@ -918,8 +920,11 @@ primers.each do |setname,primer_pair|
       r2s = r2_pass[k]
       loc_r1 = sequence_locator(r1s,temp_out)
       x = loc_r1[1]
-      s = r1s[-(x-2252)..-1] + r2s[(x-2328),(2549-x)]
-      next unless s
+      p1 = loc_r1[4][-(x-2252)..-1]
+      next unless p1
+      next if p1.match(/-/)
+      next unless r2s[(x-2328),(2549-x)]
+      s = p1 + r2s[(x-2328),(2549-x)]
       combined_seq[k] = s
     when "INT"
       s = r1_pass[k] + r2_pass[k][171..-1]
