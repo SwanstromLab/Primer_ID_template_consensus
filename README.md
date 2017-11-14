@@ -1,6 +1,10 @@
 # Primer ID Template Consensus Sequence (TCS) Pipeline
 RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files
 
+#Version 1.34-14NOV2017
+
+	1. If the forward primer does not contain "N"s, the whole sequence will be used as the biological forward primer. 
+
 #Version 1.33-19FEB2016
 
 	1. 1. consensus cut-off model based on 3 levels of error rate (0.02, 0.01, 0.005). By default 0.02. 
