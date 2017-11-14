@@ -1,15 +1,15 @@
 =begin
-TCS Pipeline Version 1.33-19FEB2017
+TCS Pipeline Version 1.34-14NOV2017
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.33-19FEB2017"
+ver = "1.34-14NOV2017"
 #############Patch Note#############
 =begin
-1. consensus cut-off model based on 3 levels of error rate (0.02, 0.01, 0.005). By default 0.02. 
+1. If the forward primer does not contain "N"s, the whole sequence will be used as the biological forward primer. 
 =end
 
 
@@ -357,9 +357,13 @@ primers.each do |setname,primer_pair|
   n_paired = 0
   forward_primer = primer_pair[0]
   reverse_primer = primer_pair[1]
-  forward_primer.match(/(N+)(\w+)$/)
-  forward_n = $1.size
-  $forward_bio_primer = $2
+  if forward_primer.match(/(N+)(\w+)$/)
+    forward_n = $1.size
+    $forward_bio_primer = $2
+  else
+    forward_n = 0
+    $forward_bio_primer = forward_primer
+  end
   forward_bio_primer_size = $forward_bio_primer.size
   forward_starting_number = forward_n + forward_bio_primer_size
   reverse_primer.match(/(N+)(\w+)$/)
