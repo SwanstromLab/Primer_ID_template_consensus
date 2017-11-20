@@ -27,7 +27,7 @@ $muscledir = "/nas02/apps/muscle-3.8.31/bin/muscle"
 primers = {}
 
 primers["RT"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNGGCCATTGACAGAAGAAAAAATAAAAGC","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNCAGTCACTATAGGCTGTACTGTCCATTTATC"]
-primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC"]
+primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNCAGTCCATTTTGCTYTAYTRABVTTACAATRTGC"]
 primers["INT"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNAAAAGGAGAAGCCATGCATG","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNATCGAATACTGCCATTTGTACTGC"]
 primers["PR"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTCAGAGCAGACCAGAGCCAACAGCCCCA", "GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNCAGTTTAACTTTTGGGCCATCCATTCC"]
 
@@ -547,10 +547,10 @@ primers.each do |setname,primer_pair|
   forward_primer = primer_pair[0]
   reverse_primer = primer_pair[1]
   forward_primer.match(/(N+)(\w+)$/)
-  forward_n = $1.size
+  $forward_n = $1.size
   $forward_bio_primer = $2
   forward_bio_primer_size = $forward_bio_primer.size
-  forward_starting_number = forward_n + forward_bio_primer_size
+  forward_starting_number = $forward_n + forward_bio_primer_size
   reverse_primer.match(/(N+)(\w+)$/)
   reverse_n = $1.size
   $reverse_bio_primer = $2
@@ -621,7 +621,7 @@ primers.each do |setname,primer_pair|
       next if seq =~ /A{11}/
       next if seq =~ /T{11}/
       
-      primer = seq[4,l]
+      primer = seq[$forward_n,l]
       if primer =~ /#{ref}/
         sequence_passed[name] = seq
       end
