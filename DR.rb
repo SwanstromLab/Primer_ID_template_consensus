@@ -1,5 +1,5 @@
 =begin
-DR version 1.00-13JUN2017
+DR version 1.02-21NOV2017
 based on TCS Pipeline Version 1.33-19FEB2017 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, INT, V1/V3
@@ -10,10 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.01-21SEP2017 based on TCS 1.33-19FEB2017"
+ver = "1.02-21NOV2017 based on TCS 1.33-19FEB2017"
 #############Patch Note#############
 =begin
-  1. Post consensus filter improved for PR region. 
+  1. Update with new V3 primer. 
 =end
 
 
