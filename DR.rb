@@ -10,10 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.02-21NOV2017 based on TCS 1.33-19FEB2017"
+ver = "1.03-07DEC2017 based on TCS 1.33-19FEB2017"
 #############Patch Note#############
 =begin
-  1. Update with new V3 primer. 
+  1. Fix a bug of method #sequence_locator
 =end
 
 
@@ -471,19 +471,22 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
       l2 = l2 + g2
     end
   end
+  ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
+  temp_in = File.open(temp_file,"w")
+  temp_in.puts ">ref"
+  temp_in.puts ref
+  temp_in.puts name
+  temp_in.puts seq
+  temp_in.close
+  print `#{$muscledir} -in #{temp_file} -out #{temp_aln} -quiet`
   aln_seq = fasta_to_hash(temp_aln)
   aln_test = aln_seq[name]
-  aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
-  gap_begin = $1.size
-  gap_end = $3.size
-  aln_test2 = $2
   ref = aln_seq[">ref"]
-  ref = ref[gap_begin..(-gap_end-1)]
   ref_size = ref.size
   sim_count = 0
   (0..(ref_size-1)).each do |n|
     ref_base = ref[n]
-    test_base = aln_test2[n]
+    test_base = aln_test[n]
     sim_count += 1 if ref_base == test_base
   end
   similarity = (sim_count/ref_size.to_f*100).round(1)
@@ -491,8 +494,12 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   print `rm -f #{temp_aln}`
   loc_p1 = l1 + 1
   loc_p2 = hxb2_l - l2
-  indel = true unless seq.size == (loc_p2 - loc_p1 + 1)
-  return [loc_p1,loc_p2,similarity,indel,aln_test2]
+  if seq.size != (loc_p2 - loc_p1 + 1)
+      indel = true
+  elsif aln_test.include?("-")
+      indel = true
+  end
+  return [loc_p1,loc_p2,similarity,indel,aln_test]
 end
 
 def fasta_to_hash(infile)
