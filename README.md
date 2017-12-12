@@ -1,6 +1,10 @@
 # Primer ID Template Consensus Sequence (TCS) Pipeline
 RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files
 
+#DR script Version 1.03-07DEC2017
+
+	1. Fix a bug of method #sequence_locator
+
 #DR script Version 1.02-21NOV2017
 
 	1. Update new V3 DR primer. 
