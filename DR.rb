@@ -104,7 +104,9 @@ end
 
 #obtain a consensus sequences
 def consensus_without_alignment(seq_array,gap_treatment = 1)
-  length = seq_array[0].size
+  all_length = []
+  seq_array.each {|seq| all_length << seq.size}
+  length = all_length.mean.round(0)
   consensus_bases = []
   (0..(length-1)).each do |n|
     bases = []
