@@ -161,7 +161,7 @@ def creat_consensus_base_non_gap(base_array_input)
       end
     end
   end
-  return consensus_base.chr
+  return consensus_base.chr if consensus_base
 end
 
 
