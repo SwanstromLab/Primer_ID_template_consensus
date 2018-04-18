@@ -10,10 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.03-07DEC2017 based on TCS 1.33-19FEB2017"
+ver = "1.04-18APR2018 based on TCS 1.33-19FEB2017"
 #############Patch Note#############
 =begin
-  1. Fix a bug of method #sequence_locator
+  1. Fix a bug of method #sequence_locator. Refine the alignment if the ref sequence restarts and/or ends with "-".
 =end
 
 
@@ -474,6 +474,28 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     end
   end
   ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
+  
+  temp_in = File.open(temp_file,"w")
+  temp_in.puts ">ref"
+  temp_in.puts ref
+  temp_in.puts name
+  temp_in.puts seq
+  temp_in.close
+  print `#{$muscledir} -in #{temp_file} -out #{temp_aln} -quiet`
+  aln_seq = fasta_to_hash(temp_aln)
+  aln_test = aln_seq[name]
+  ref = aln_seq[">ref"]
+  
+  #refine alignment
+  
+  if ref =~ /^(\-+)/
+    l1 = l1 - $1.size
+  elsif ref =~ /(\-+)$/
+    l2 = l2 + $1.size
+  end
+  
+  ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
+  
   temp_in = File.open(temp_file,"w")
   temp_in.puts ">ref"
   temp_in.puts ref
@@ -501,7 +523,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   elsif aln_test.include?("-")
       indel = true
   end
-  return [loc_p1,loc_p2,similarity,indel,aln_test]
+  return [loc_p1,loc_p2,similarity,indel,aln_test,ref]
 end
 
 def fasta_to_hash(infile)
