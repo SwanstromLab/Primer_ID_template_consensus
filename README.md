@@ -3,8 +3,7 @@ RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files
 
 #DR script Version 1.04-18APR2018
 
-	1. Fix a bug of method #sequence_locator. Refine the alignment if the
-ref sequence restarts and/or ends with "-"
+	1. Fix a bug of method #sequence_locator. Refine the alignment if the ref sequence restarts and/or ends with "-"
 
 
 #DR script Version 1.03-07DEC2017
