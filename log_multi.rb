@@ -45,6 +45,7 @@ libs.each do |lib|
   else
     dir2 = indir + "/" + lib
   end
+  next if File.exist?(dir2 + "/temp_seq")
   bars = []
   Dir.chdir(dir2) {bars = Dir.glob("*")}
   bars.each do |bar|
@@ -190,7 +191,7 @@ pools.each do |poolname|
   else
     consensus_dir = pool_dir
   end
- 
+  next if File.exist?(consensus_dir+ "/temp_seq")
   barcodes = []
   Dir.chdir(consensus_dir){barcodes = Dir.glob("*")}
   barcodes.each do |b1|
