@@ -702,14 +702,15 @@ primers.each do |setname,primer_pair|
   print `rm -rf #{temp_out}`
 end
 
-outdir_tar = outdir + ".tar.gz"
+# outdir_tar = outdir + ".tar.gz"
 
-if File.exists?(outdir_tar)
-  File.unlink(outdir_tar)
-end
-Dir.chdir(indir) {print `tar -czf #{File.basename(outdir_tar)} #{File.basename(outdir)}`}
+# if File.exists?(outdir_tar)
+#   File.unlink(outdir_tar)
+# end
+# Dir.chdir(indir) {print `tar -czf #{File.basename(outdir_tar)} #{File.basename(outdir)}`}
 
-
-print `rm -rf #{outdir}`
+# print `rm -rf #{outdir}`
 print `rm -rf #{r1_f}`
 print `rm -rf #{r2_f}`
+
+print `touch #{indir}/done`
