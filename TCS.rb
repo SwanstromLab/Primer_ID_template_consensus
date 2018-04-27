@@ -346,7 +346,7 @@ end
 
 t = Time.now
 #outdir = indir + "/consensus_out" + "_" + t.year.to_s + "_" + t.month.to_s + "_" + t.day.to_s + "_" + t.hour.to_s + "_" + t.min.to_s
-outdir = indir + "/" + File.basename(indir)
+outdir = indir + "/"# + File.basename(indir)
 Dir.mkdir(outdir) unless File.directory?(outdir)
 
 
@@ -713,4 +713,4 @@ end
 print `rm -rf #{r1_f}`
 print `rm -rf #{r2_f}`
 
-print `touch #{indir}/done`
+print `touch #{outdir}/done`
