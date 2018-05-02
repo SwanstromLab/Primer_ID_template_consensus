@@ -1,15 +1,15 @@
 =begin
-TCS Pipeline Version 1.35-27Feb2018
+TCS Pipeline Version 1.36-01MAY2018
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.35-27Feb2018"
+ver = "1.36-01MAY2018"
 #############Patch Note#############
 =begin
-1. Fix a bug when creating a conensus sequences with raw sequences that are different in length in a rare situation. 
+1. Remove the temp_dir if fail to create TCS
 =end
 
 
@@ -349,7 +349,8 @@ t = Time.now
 outdir = indir + "/"# + File.basename(indir)
 Dir.mkdir(outdir) unless File.directory?(outdir)
 
-
+temp_out = indir + "/temp_seq"
+Dir.mkdir(temp_out) unless File.directory?(temp_out)
 
 primers.each do |setname,primer_pair|
   puts "Processing " + setname
@@ -492,8 +493,7 @@ primers.each do |setname,primer_pair|
   
   #create a temp file. Temp file contains sequence names, primer ids, and sequences from two ends
   puts "Create Temp File...."
-  temp_out = indir + "/temp_seq"
-  Dir.mkdir(temp_out) unless File.directory?(temp_out)
+
   temp_file = temp_out + "/temp_file_" + setname
   temp_file_out = File.open(temp_file,'w')
   
@@ -699,7 +699,6 @@ primers.each do |setname,primer_pair|
   end
   
   log_f.close
-  print `rm -rf #{temp_out}`
 end
 
 # outdir_tar = outdir + ".tar.gz"
@@ -712,5 +711,6 @@ end
 # print `rm -rf #{outdir}`
 print `rm -rf #{r1_f}`
 print `rm -rf #{r2_f}`
+print `rm -rf #{temp_out}`
 
 print `touch #{outdir}/done`

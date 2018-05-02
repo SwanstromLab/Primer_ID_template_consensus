@@ -1,5 +1,5 @@
 =begin
-DR version 1.02-21NOV2017
+DR version 1.05-01MAY2018
 based on TCS Pipeline Version 1.33-19FEB2017 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, INT, V1/V3
@@ -10,10 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.04-18APR2018 based on TCS 1.33-19FEB2017"
+ver = "1.05-01MAY2018 based on TCS 1.36-01MAY2018"
 #############Patch Note#############
 =begin
-  1. Fix a bug of method #sequence_locator. Refine the alignment if the ref sequence restarts and/or ends with "-".
+  1. Remove the temp_dir if fail to create TCS
 =end
 
 
@@ -567,7 +567,8 @@ t = Time.now
 outdir = indir + "/"# + File.basename(indir)
 Dir.mkdir(outdir) unless File.directory?(outdir)
 
-
+temp_out = indir + "/temp_seq"
+Dir.mkdir(temp_out) unless File.directory?(temp_out)
 
 primers.each do |setname,primer_pair|
   puts "Processing " + setname
@@ -706,8 +707,8 @@ primers.each do |setname,primer_pair|
   
   #create a temp file. Temp file contains sequence names, primer ids, and sequences from two ends
   puts "Create Temp File...."
-  temp_out = indir + "/temp_seq"
-  Dir.mkdir(temp_out) unless File.directory?(temp_out)
+
+
   temp_file = temp_out + "/temp_file_" + setname
   temp_file_out = File.open(temp_file,'w')
   
@@ -1028,7 +1029,7 @@ primers.each do |setname,primer_pair|
   end
   
   log_f.close
-  print `rm -rf #{temp_out}`
+
 end
 
 # outdir_tar = outdir + ".tar.gz"
@@ -1041,5 +1042,7 @@ end
 # print `rm -rf #{outdir}`
 print `rm -rf #{r1_f}`
 print `rm -rf #{r2_f}`
+print `rm -rf #{temp_out}`
+
 
 print `touch #{outdir}/done`
