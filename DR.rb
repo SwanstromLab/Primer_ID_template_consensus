@@ -2,7 +2,7 @@
 DR version 1.05-01MAY2018
 based on TCS Pipeline Version 1.33-19FEB2017 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
-Protease, RT, INT, V1/V3
+Protease, RT, IN, V1/V3
 
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
@@ -28,7 +28,7 @@ primers = {}
 
 primers["RT"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNGGCCATTGACAGAAGAAAAAATAAAAGC","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNCAGTCACTATAGGCTGTACTGTCCATTTATC"]
 primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNCAGTCCATTTTGCTYTAYTRABVTTACAATRTGC"]
-primers["INT"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNAAAAGGAGAAGCCATGCATG","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNATCGAATACTGCCATTTGTACTGC"]
+primers["IN"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNAAAAGGAGAAGCCATGCATG","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNNNATCGAATACTGCCATTTGTACTGC"]
 primers["PR"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTCAGAGCAGACCAGAGCCAACAGCCCCA", "GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNCAGTTTAACTTTTGGGCCATCCATTCC"]
 
 #input file is the directory containing sequences from both ends of one library
@@ -884,7 +884,7 @@ primers.each do |setname,primer_pair|
       if (loc[0] < 2253) and (loc[1] > 2329)
         r1_uni_pass << k
       end 
-    when "INT"
+    when "IN"
       next if loc[3]
       if (loc[0] == 4384) and (loc[1] == 4658)
         r1_uni_pass << k
@@ -908,7 +908,7 @@ primers.each do |setname,primer_pair|
       if (loc[0] == 2329) and (loc[1] == 2591)
         r2_uni_pass << k
       end      
-    when "INT"
+    when "IN"
       next if loc[3]
       if (loc[0] == 4488) and (loc[1] == 4751)
         r2_uni_pass << k
@@ -958,7 +958,7 @@ primers.each do |setname,primer_pair|
       next unless r2s[(x-2328),(2549-x)]
       s = p1 + r2s[(x-2328),(2549-x)]
       combined_seq[k] = s
-    when "INT"
+    when "IN"
       s = r1_pass[k] + r2_pass[k][171..-1]
       next unless s
       combined_seq[k] = s
