@@ -26,14 +26,16 @@ rename = true if ARGV[1] == "-rename"
 libs = []
 
 Dir.chdir(indir) {libs = Dir.glob("*")}
-outdir = indir + "_consensus"
+outdir = indir + "_TCS"
 Dir.mkdir(outdir) unless File.directory?(outdir)
-outdir1 = outdir + "/consensus1"
-outdir2 = outdir + "/consensus2"
-outdir3 = outdir + "/consensus3"
+outdir1 = outdir + "/TCS_r1_r2"
+outdir2 = outdir + "/combined_TCS_per_lib"
+outdir3 = outdir + "/TCS_per_region"
 Dir.mkdir(outdir1) unless File.directory?(outdir1)
 Dir.mkdir(outdir2) unless File.directory?(outdir2)
 Dir.mkdir(outdir3) unless File.directory?(outdir3)
+outdir4 = outdir + "/combined_TCS_per_region"
+Dir.mkdir(outdir4) unless File.directory?(outdir4)
 
 combined_exist = false
 
@@ -108,25 +110,6 @@ libs.each do |lib|
     out1_r1.close
     out1_r2.close
     
-    c2_d1 = outdir2 + "/" + lib
-    Dir.mkdir(c2_d1) unless File.directory?(c2_d1)
-    c2_d2 = c2_d1 + "/" + bar
-    Dir.mkdir(c2_d2) unless File.directory?(c2_d2)
-    p1 = c2_d2 + "/" + lib + "_" + bar + "_r1"
-    p2 = c2_d2 + "/" + lib + "_" + bar + "_r2"
-    out1_r1 = File.open(p1,"w")
-    out1_r2 = File.open(p2,"w")
-    r1_new.each do |k,v|
-      out1_r1.puts k
-      out1_r1.puts v
-    end
-    r2_new.each do |k,v|
-      out1_r2.puts k
-      out1_r2.puts v
-    end
-    out1_r1.close
-    out1_r2.close
-    
     c3_d1 = outdir3 + "/" + bar
     Dir.mkdir(c3_d1) unless File.directory?(c3_d1)
     c3_d2 = c3_d1 + "/" + lib
@@ -147,16 +130,19 @@ libs.each do |lib|
     out1_r2.close
     
     next if combined_file == ""
-    combined_exist = true
-  
-    outdir4 = outdir + "/combined_consensus"
-    Dir.mkdir(outdir4) unless File.directory?(outdir4)
+    
+    c2_d1 = outdir2 + "/" + lib
+    Dir.mkdir(c2_d1) unless File.directory?(c2_d1)
+    
     outdir_bar = outdir4 + "/" + bar
     Dir.mkdir(outdir_bar) unless File.directory?(outdir_bar)
     
     combined_file = dir3 + "/" + combined_file
     path_combined = outdir_bar + "/" + lib + "_" + bar + "_combined"
-    print `cp #{combined_file} #{path_combined}` 
+    path_combined2 = c2_d1 + "/" + lib + "_" + bar
+    print `cp #{combined_file} #{path_combined}`
+    print `cp #{combined_file} #{path_combined2}`
+   
   end
 end
 
