@@ -1,6 +1,6 @@
 =begin
-DR version 1.05-01MAY2018
-based on TCS Pipeline Version 1.33-19FEB2017 for HIV-1 Multiplexing Drug Resistance Tesing
+DR version 1.06-24MAY2018
+based on TCS Pipeline Version 1.37-24MAY2018 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, IN, V1/V3
 
@@ -10,10 +10,11 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.05-01MAY2018 based on TCS 1.36-01MAY2018"
+ver = "1.06-24MAY2018 based on TCS 1.37-24MAY2018"
 #############Patch Note#############
 =begin
-  1. Remove the temp_dir if fail to create TCS
+  1. Input files can be either .fastq or .fastq.gz, will unzip if it is .gz file
+  2. Minor improvement of efficiency
 =end
 
 
@@ -622,12 +623,13 @@ primers.each do |setname,primer_pair|
     
     sequence_h = array_to_hash(sequence_a)
     sequence_passed = {}
+    $ignore_first_nt ? id_l_for_primer = id_l + 1 : id_l_for_primer = id_l
     sequence_h.each do |name,seq|
       next if seq[1..-2] =~ /N/
       next if seq =~ /A{11}/
       next if seq =~ /T{11}/
      
-      primer = seq[($ignore_first_nt ? id_l + 1 : id_l),l]
+      primer = seq[id_l_for_primer,l]
       if primer =~ /#{ref}/
         sequence_passed[name] = seq
       end
@@ -727,9 +729,10 @@ primers.each do |setname,primer_pair|
   bio_id = {}
   bio_non_id = {}
   
+  $ignore_first_nt ? id_truncate = 1 : id_truncate = 0
   paired_r2.each do |k,r2_seq|
     r1 = paired_r1[k]
-    id[k] = r2_seq[($ignore_first_nt ? 1 : 0),id_l]
+    id[k] = r2_seq[id_truncate,id_l]
     bio_id[k] = r2_seq[reverse_starting_number..-2]
     bio_non_id[k] = r1[forward_starting_number..-2]
     temp_file_out.print k+ "\n" + id[k] + "\n" + bio_id[k] + "\n"+bio_non_id[k] + "\n"
