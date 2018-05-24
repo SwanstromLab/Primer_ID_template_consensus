@@ -542,6 +542,16 @@ def fasta_to_hash(infile)
   return return_hash
 end
 
+def unzip_r(indir, f)
+  r_file = indir + "/" + f
+  if f =~ /.gz/
+    print `gzip -d #{r_file}`
+    new_f = f.sub ".gz", ""
+    r_file = indir + "/" + new_f
+  end
+  return r_file
+end
+
 #####################End of General Methods
 
 #obtain files for two ends for the input directory
@@ -556,9 +566,9 @@ r1_f = ""
 r2_f = ""
 files.each do |f|
   if f =~ /r1/i
-    r1_f = indir + "/" + f
+    r1_f = unzip_r(indir, f)
   elsif f =~ /r2/i
-    r2_f = indir + "/" + f
+    r2_f = unzip_r(indir, f)
   end
 end
 
