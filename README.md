@@ -1,6 +1,12 @@
 # Primer ID Template Consensus Sequence (TCS) Pipeline
 RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files
 
+#TCS script Version 1.37-24MAY2018 and DR Version 1.06-24MAY2018
+	
+	1. Input files can be either .fastq or .fastq.gz, will unzip if it is .gz file
+	2. Minor improvement of efficiency
+
+
 #TCS script Version 1.36-01MAY2018 and DR Version 1.05-01MAY2018
 
 	1. Remove the temp_dir if fail to create TCS
