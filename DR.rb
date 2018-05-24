@@ -545,7 +545,7 @@ end
 def unzip_r(indir, f)
   r_file = indir + "/" + f
   if f =~ /.gz/
-    print `gzip -d #{r_file}`
+    `gzip -d #{r_file}`
     new_f = f.sub ".gz", ""
     r_file = indir + "/" + new_f
   end
