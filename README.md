@@ -1,13 +1,17 @@
 # Primer ID Template Consensus Sequence (TCS) Pipeline
 
-## **RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files**
+## RUBY Script to creat Primer ID tempalate consensus from raw MiSeq fastq files
 
-## Script List
+## Scripts List
 
     TCS.rb          -The general script to construct TCS
+    
     Dr.rb           -The script to construct TCS for the MPID-HIVDR MiSeq sequencing. Post-TCS QC will check if the TCSs are in the correct sequencing regions
+    
     log_multi.rb    -Format and sort TCSs and libraries after TCS.rb or DR.rb
+    
     SDRM.rb         -Surveillance Drug Resistance Mutation (SDRM) analysis using TCSs from the Dr.rb pipeline.
+    
     sequence.rb     -functions and constants
     
 ## Updates
