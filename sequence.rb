@@ -2313,7 +2313,7 @@ def poisson_minority_cutoff(seq_array, error_rate = 0.0001, fold_cutoff = 20)
   poisson_hash = poisson_distribution(rate, max_count)
   poisson_hash.each do |k,v|
     cal = l * v
-    obs = count_mut[k]
+    obs = count_mut[k] ? count_mut[k] : 0
     if obs >= fold_cutoff * cal
       cut_off = k
       break
