@@ -2306,7 +2306,7 @@ end
 #example: cut-off = 2 means that mutations appear at least 2 times are very likely to be a true mutation instead of residual methods errors.
 def poisson_minority_cutoff(seq_array, error_rate = 0.0001, fold_cutoff = 20)
   cut_off = 0
-  l = seq_array.size
+  l = seq_array[0].size
   rate = seq_array.size * error_rate
   count_mut = variant_for_poisson(seq_array)
   max_count = count_mut.keys.max
