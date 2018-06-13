@@ -2671,5 +2671,5 @@ def shannons_entropy(sequences)
     end
     entropy_hash[(position + 1)] = entropy
   end
-  return entropy_array
+  return entropy_hash
 end
