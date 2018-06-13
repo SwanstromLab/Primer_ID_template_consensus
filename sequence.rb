@@ -2311,6 +2311,7 @@ def poisson_minority_cutoff(seq_array, error_rate = 0.0001, fold_cutoff = 20)
   count_mut = variant_for_poisson(seq_array)
   max_count = count_mut.keys.max
   poisson_hash = poisson_distribution(rate, max_count)
+  
   poisson_hash.each do |k,v|
     cal = l * v
     obs = count_mut[k] ? count_mut[k] : 0
@@ -2648,4 +2649,27 @@ def sdrm_in_bulk(sequences, cutoff = 0)
   end
   
   return [point_mutation_list, linkage_list, report_list]
+end
+
+
+#calculate Shannon's entropy, Euler's number as the base of logarithm
+#https://en.wikipedia.org/wiki/Entropy_(information_theory)
+
+def shannons_entropy(sequences)
+  entropy_hash = {}
+  seq_l = sequences[0].size
+  seq_size = sequences.size
+  (0..(seq_l - 1)).each do |position|
+    element = []
+    sequences.each do |seq|
+      element << seq[position]
+    end
+    entropy = 0
+    count(element).each do |k,v|
+      p = v/seq_size.to_f
+      entropy += (-p * Math.log(p))
+    end
+    entropy_hash[(position + 1)] = entropy
+  end
+  return entropy_array
 end
