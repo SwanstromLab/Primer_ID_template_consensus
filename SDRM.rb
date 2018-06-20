@@ -1,6 +1,41 @@
-load "sequence.rb"
+require_relative "sequence"
 #SDRM analysis for PR, RT and IN regions.
-#input argv is the directory combined_TCS_per_lib dir from log_multi.rb script. 
+#Calculate Pi for recency, require R (3.5.0 and above). List of R packages required: phangorn, ape, ggplot2, scales, ggforce, cowplot, magrittr, gridExtra
+
+
+#require MUSCLE, define path_to_muscle
+$path_to_muscle = "muscle"
+
+r_script = 'setwd("PATH_TO_FASTA") 
+library(phangorn)
+library(ape)
+library(ggplot2)
+library(scales)
+library(ggforce)
+library(cowplot)
+library(magrittr)
+library(gridExtra)
+pdf("OUTPUT_PDF", onefile=T, width=6, height=4)
+fileNames <- list.files()
+for (fileName in fileNames) {  
+dna <- read.dna(fileName, format="fasta")
+class(dna)
+D<- dist.dna(dna, model="raw")
+pi <- mean(D)
+dist20 <- quantile(D, prob=c(0.20))
+alldist <- data.frame(File=fileName, pi, dist20)
+write.table(alldist,"OUTPUT_CSV",append=TRUE, sep = ",", row.names = FALSE, col.names=FALSE)
+D2 <- dist.dna(dna, model="TN93")*100
+def.par <- par(no.readonly = TRUE)
+par(mfrow=c(1,2))
+hist<-hist(D, main=fileName, xlab="% Pairwise Distance", ylab="Frequency", col="gray") 
+abline(v=dist20, col="royalblue",lwd=2) 
+abline(v=pi, col="red", lwd=2)
+njtree<-NJ(D2)
+njtreeplot <- plot(njtree, show.tip.label=F, "unrooted", main=fileName)
+add.scale.bar(cex=0.7, font=2, col="red")
+}
+dev.off()'
 
 indir = ARGV[0]
 libs = Dir[indir + "/*"]
@@ -31,6 +66,9 @@ libs.each do |lib|
   
   filtered_seq_dir = out_lib_dir + "/" + lib_name + "_filtered_seq"
   Dir.mkdir(filtered_seq_dir) unless File.directory?(filtered_seq_dir)
+  
+  aln_seq_dir = out_lib_dir + "/" + lib_name + "_aln_seq"
+  Dir.mkdir(aln_seq_dir) unless File.directory?(aln_seq_dir)
   
   point_mutation_list = []
   linkage_list = []
@@ -104,4 +142,21 @@ libs.each do |lib|
   aa_report_list.each do |record|
     aa_report_out.puts record.join(",")
   end
+  
+  filtered_seq_files = Dir[filtered_seq_dir + "/*"]
+  filtered_seq_files.each do |seq_file|
+    print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -quiet`
+  end
+  
+  r_script.gsub!(/PATH_TO_FASTA/, aln_seq_dir)
+  out_r_csv = out_lib_dir + "/" + lib_name + "_pi.csv"
+  out_r_pdf = out_lib_dir + "/" + lib_name + "_pi.pdf"
+  File.unlink(out_r_csv) if File.exist?(out_r_csv)
+  File.unlink(out_r_pdf) if File.exist?(out_r_pdf)
+  r_script.gsub!(/OUTPUT_CSV/,out_r_csv)
+  r_script.gsub!(/OUTPUT_PDF/,out_r_pdf)
+  r_script_file = out_lib_dir + "/pi.R"
+  File.open(r_script_file,"w") {|line| line.puts r_script}
+  print `Rscript #{r_script_file}`
+  File.unlink(r_script_file)
 end
