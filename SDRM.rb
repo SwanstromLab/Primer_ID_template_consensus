@@ -6,7 +6,7 @@ require_relative "sequence"
 #require MUSCLE, define path_to_muscle
 $path_to_muscle = "muscle"
 
-r_script = 'setwd("PATH_TO_FASTA") 
+R_SCRIPT = 'setwd("PATH_TO_FASTA") 
 library(phangorn)
 library(ape)
 library(ggplot2)
@@ -28,7 +28,7 @@ write.table(alldist,"OUTPUT_CSV",append=TRUE, sep = ",", row.names = FALSE, col.
 D2 <- dist.dna(dna, model="TN93")*100
 def.par <- par(no.readonly = TRUE)
 par(mfrow=c(1,2))
-hist<-hist(D, main=fileName, xlab="% Pairwise Distance", ylab="Frequency", col="gray") 
+hist<-hist(D, main=fileName, xlab="% Pairwise Distance", ylab="Frequency", col="gray")
 abline(v=dist20, col="royalblue",lwd=2) 
 abline(v=pi, col="red", lwd=2)
 legend(x="topright", c("dist20", "pi"), col = c("royalblue", "red"), lwd = c(2,2), cex=0.5)
@@ -44,6 +44,7 @@ outdir = indir + "_SDRM"
 Dir.mkdir(outdir) unless File.directory?(outdir)
 
 libs.each do |lib|
+  r_script = R_SCRIPT.dup
   next unless File.directory?(lib)
   lib_name = File.basename(lib)
   out_lib_dir = outdir + "/" + lib_name
@@ -51,7 +52,7 @@ libs.each do |lib|
   sub_seq_files = Dir[lib + "/*"]
   seq_summary_file = out_lib_dir + "/" + lib_name + "_summary.csv"
   seq_summary_out = File.open(seq_summary_file, "w")
-  seq_summary_out.puts "Region,TCS,TCS with A3G/F hypermutation,TCS with stop codon,TCS w/o hypermutation and stop codon, Poisson cutoff for minority mutation (>=)"
+  seq_summary_out.puts "Region,TCS,TCS with A3G/F hypermutation,TCS with stop codon,TCS w/o hypermutation and stop codon, Poisson cutoff for minority mutation (>=),Pi,Dist20"
   
   point_mutation_file = out_lib_dir + "/" + lib_name + "_substitution.csv"
   point_mutation_out = File.open(point_mutation_file, "w")
@@ -74,19 +75,20 @@ libs.each do |lib|
   point_mutation_list = []
   linkage_list = []
   aa_report_list = []
+  summary_hash = {}
   
   sub_seq_files.each do |sub_seq|
     seq_basename = File.basename(sub_seq)
     seqs = fasta_to_hash(sub_seq)
     if seq_basename =~ /V1V3/i
-      seq_summary_out.puts "V1V3,#{seqs.size.to_s},NA,NA,NA,NA,"
+      summary_hash["V1V3"] = "#{seqs.size.to_s},NA,NA,NA,NA"
       print `cp #{sub_seq} #{filtered_seq_dir}`
     elsif seq_basename =~ /PR/i
       hypermut_seq = a3g_hypermut_seq_hash(seqs)[0]
       stop_codon_seq = stop_codon_seq_hash(seqs, 0)
       filtered_seq = seqs.difference(hypermut_seq).difference(stop_codon_seq)
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
-      seq_summary_out.puts "PR,#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
+      summary_hash["PR"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_pr_bulk(filtered_seq, p_cutoff)
@@ -99,7 +101,7 @@ libs.each do |lib|
       stop_codon_seq = stop_codon_seq_hash(seqs, 2)
       filtered_seq = seqs.difference(hypermut_seq).difference(stop_codon_seq)
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
-      seq_summary_out.puts "IN,#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
+      summary_hash["IN"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_in_bulk(filtered_seq, p_cutoff)
@@ -123,7 +125,7 @@ libs.each do |lib|
       reject_keys = (hypermut_seq_keys | stop_codon_seq_keys)
       filtered_seq = seqs.reject {|k,v| reject_keys.include?(k) }
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
-      seq_summary_out.puts "RT,#{seqs.size.to_s},#{hypermut_seq_keys.size.to_s},#{stop_codon_seq_keys.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
+      summary_hash["RT"] = "#{seqs.size.to_s},#{hypermut_seq_keys.size.to_s},#{stop_codon_seq_keys.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_rt_bulk(filtered_seq, p_cutoff)
@@ -149,7 +151,7 @@ libs.each do |lib|
     print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -quiet`
   end
   
-  r_script.gsub!(/PATH_TO_FASTA/, aln_seq_dir)
+  r_script.gsub!(/PATH_TO_FASTA/,aln_seq_dir)
   out_r_csv = out_lib_dir + "/" + lib_name + "_pi.csv"
   out_r_pdf = out_lib_dir + "/" + lib_name + "_pi.pdf"
   File.unlink(out_r_csv) if File.exist?(out_r_csv)
@@ -159,5 +161,16 @@ libs.each do |lib|
   r_script_file = out_lib_dir + "/pi.R"
   File.open(r_script_file,"w") {|line| line.puts r_script}
   print `Rscript #{r_script_file}`
-  File.unlink(r_script_file)
+  pi_csv = File.readlines(out_r_csv)
+  pi_csv.each do |line|
+    line.chomp!
+    data = line.split(",")
+    tag = data[0].split("_")[1].gsub(/\W/,"")
+    summary_hash[tag] += "," + data[1].to_f.round(4).to_s + "," + data[2].to_f.round(4).to_s
+  end
+  ["PR", "RT", "IN", "V1V3"].each do |regions|
+    next unless summary_hash[regions]
+    seq_summary_out.puts regions + "," + summary_hash[regions]
+  end
+  File.unlink(r_script_file, out_r_csv)
 end
