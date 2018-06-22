@@ -160,7 +160,7 @@ libs.each do |lib|
   r_script.gsub!(/OUTPUT_PDF/,out_r_pdf)
   r_script_file = out_lib_dir + "/pi.R"
   File.open(r_script_file,"w") {|line| line.puts r_script}
-  print `Rscript #{r_script_file}`
+  print `Rscript #{r_script_file} 1> /dev/null 2> /dev/null`
   pi_csv = File.readlines(out_r_csv)
   pi_csv.each do |line|
     line.chomp!
