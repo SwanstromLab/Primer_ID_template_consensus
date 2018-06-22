@@ -10,7 +10,7 @@
     
     log_multi.rb    -Format and sort TCSs and libraries after TCS.rb or DR.rb
     
-    SDRM.rb         -Surveillance Drug Resistance Mutation (SDRM) analysis using TCSs from the Dr.rb pipeline.
+    SDRM.rb         -Surveillance Drug Resistance Mutation (SDRM) analysis using TCSs from the Dr.rb pipeline, also generate N-J trees and calculate Pi and first quintile of pairwise comparison.
     
     sequence.rb     -functions and constants
     
