@@ -148,7 +148,7 @@ libs.each do |lib|
   
   filtered_seq_files = Dir[filtered_seq_dir + "/*"]
   filtered_seq_files.each do |seq_file|
-    print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -quiet`
+    print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -maxiters 2 -quiet`
   end
   
   r_script.gsub!(/PATH_TO_FASTA/,aln_seq_dir)
