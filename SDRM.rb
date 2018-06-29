@@ -80,6 +80,7 @@ libs.each do |lib|
   sub_seq_files.each do |sub_seq|
     seq_basename = File.basename(sub_seq)
     seqs = fasta_to_hash(sub_seq)
+    next if seqs.size == 0
     if seq_basename =~ /V1V3/i
       summary_hash["V1V3"] = "#{seqs.size.to_s},NA,NA,NA,NA"
       print `cp #{sub_seq} #{filtered_seq_dir}`
@@ -147,6 +148,7 @@ libs.each do |lib|
   end
   
   filtered_seq_files = Dir[filtered_seq_dir + "/*"]
+  next if filtered_seq_files.size == 0
   filtered_seq_files.each do |seq_file|
     print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -maxiters 2 -quiet`
   end
