@@ -1056,6 +1056,3 @@ end
 print `rm -rf #{r1_f}`
 print `rm -rf #{r2_f}`
 print `rm -rf #{temp_out}`
-
-
-print `touch #{outdir}/done`
