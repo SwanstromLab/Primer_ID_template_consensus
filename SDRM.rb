@@ -176,3 +176,5 @@ libs.each do |lib|
   end
   File.unlink(r_script_file, out_r_csv)
 end
+
+`touch #{indir}/.done`
