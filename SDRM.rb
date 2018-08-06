@@ -96,7 +96,7 @@ libs.each do |lib|
       point_mutation_list += sdrm[0]
       linkage_list += sdrm[1]
       aa_report_list += sdrm[2]
-
+      filtered_out.close
     elsif seq_basename =~/IN/i
       hypermut_seq = a3g_hypermut_seq_hash(seqs)[0]
       stop_codon_seq = stop_codon_seq_hash(seqs, 2)
@@ -109,7 +109,7 @@ libs.each do |lib|
       point_mutation_list += sdrm[0]
       linkage_list += sdrm[1]
       aa_report_list += sdrm[2]
-      
+      filtered_out.close
     elsif seq_basename =~/RT/i
       rt_seq1 = {}
       rt_seq2 = {}
@@ -133,7 +133,7 @@ libs.each do |lib|
       point_mutation_list += sdrm[0]
       linkage_list += sdrm[1]
       aa_report_list += sdrm[2]
-      
+      filtered_out.close
     end
   end
  
@@ -157,9 +157,9 @@ libs.each do |lib|
     bn = File.basename(seq_file)
     temp_file = temp_sampled_seq_dir + "/" + bn
     temp_out = File.open(temp_file,"w")
-    filtered_seq = fasta_to_hash(seq_file)
-    filtered_seq.keys.sample(1000).each do |k|
-      temp_out.puts k + "\n" + filtered_seq[k]
+    filtered_seq1 = Hash[*(File.readlines(seq_file).collect{|line|line.chomp})]
+    filtered_seq1.keys.sample(1000).each do |k|
+      temp_out.puts k + "\n" + filtered_seq1[k]
     end
     temp_out.close
   end
@@ -182,8 +182,10 @@ libs.each do |lib|
   pi_csv = File.readlines(out_r_csv)
   pi_csv.each do |line|
     line.chomp!
+    puts line
     data = line.split(",")
-    tag = data[0].split("_")[1].gsub(/\W/,"")
+    tag = data[0].split("_")[-1].gsub(/\W/,"")
+    puts tag
     summary_hash[tag] += "," + data[1].to_f.round(4).to_s + "," + data[2].to_f.round(4).to_s
   end
   ["PR", "RT", "IN", "V1V3"].each do |regions|
