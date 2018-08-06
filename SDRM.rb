@@ -149,7 +149,23 @@ libs.each do |lib|
   
   filtered_seq_files = Dir[filtered_seq_dir + "/*"]
   next if filtered_seq_files.size == 0
+  
+  temp_sampled_seq_dir = out_lib_dir + "/" + lib_name + "_temp_seq"
+  Dir.mkdir(temp_sampled_seq_dir) unless File.directory?(temp_sampled_seq_dir)
+  
   filtered_seq_files.each do |seq_file|
+    bn = File.basename(seq_file)
+    temp_file = temp_sampled_seq_dir + "/" + bn
+    temp_out = File.open(temp_file,"w")
+    filtered_seq = fasta_to_hash(seq_file)
+    filtered_seq.keys.sample(1000).each do |k|
+      temp_out.puts k + "\n" + filtered_seq[k]
+    end
+    temp_out.close
+  end
+  
+  temp_seq_files = Dir[temp_sampled_seq_dir + "/*"]
+  temp_seq_files.each do |seq_file|
     print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -maxiters 2 -quiet`
   end
   
@@ -175,6 +191,7 @@ libs.each do |lib|
     seq_summary_out.puts regions + "," + summary_hash[regions]
   end
   File.unlink(r_script_file, out_r_csv)
+  print `rm -rf #{temp_sampled_seq_dir}`
 end
 
 `touch #{outdir}/.done`
