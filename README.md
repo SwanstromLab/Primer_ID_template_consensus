@@ -16,6 +16,10 @@
     
 ## Updates
 
+### TCS script Version 1.38-24MAY2018 and DR Version 1.07-24MAY2018
+
+	1. Improved performance. 
+
 ### TCS script Version 1.37-24MAY2018 and DR Version 1.06-24MAY2018
 	
 	1. Input files can be either .fastq or .fastq.gz, will unzip if it is .gz file

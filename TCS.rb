@@ -1,16 +1,15 @@
 =begin
-TCS Pipeline Version 1.37-24MAY2018
+TCS Pipeline Version 1.38-07AUG2018
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.37-24MAY2018"
+ver = "1.38-07AUG2018"
 #############Patch Note#############
 =begin
-  1. Input files can be either .fastq or .fastq.gz, will unzip if it is .gz file
-  2. Minor improvement of efficiency
+  1. Improved performace.
 =end
 
 
@@ -598,15 +597,22 @@ primers.each do |setname,primer_pair|
   #output part 2
 
   #List of sequences with same primer ID over n.Create consensus
+  id_hash2 = {}
+  id.each do |name,pid|
+    if id_hash2[pid]
+      id_hash2[pid] << name
+    else
+      id_hash2[pid] = []
+      id_hash2[pid] << name
+    end
+  end  
   consensus = {}
   m = 0
   primer_id_count_over_n.each do |primer_id|
     m += 1
     puts "Now processing number #{m}" if m%100 == 0
-    seq_with_same_primer_id = []
-    id.each do |seq_name,primer_id_test|
-      seq_with_same_primer_id << seq_name if primer_id_test == primer_id
-    end
+    seq_with_same_primer_id = id_hash2[primer_id]
+    
     list_id_part = []
     list_non_id_part = []
     seq_with_same_primer_id.each do |seq_name|

@@ -1,6 +1,6 @@
 =begin
-DR version 1.06-24MAY2018
-based on TCS Pipeline Version 1.37-24MAY2018 for HIV-1 Multiplexing Drug Resistance Tesing
+DR version 1.07-07AUG2018
+based on TCS Pipeline Version 1.38-07AUG2018 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, IN, V1/V3
 
@@ -10,11 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.06-24MAY2018 based on TCS 1.37-24MAY2018"
+ver = "1.07-07AUG2018 based on TCS 1.38-07AUG2018"
 #############Patch Note#############
 =begin
-  1. Input files can be either .fastq or .fastq.gz, will unzip if it is .gz file
-  2. Minor improvement of efficiency
+  1. Improved performance. 
 =end
 
 
@@ -816,14 +815,20 @@ primers.each do |setname,primer_pair|
 
   #List of sequences with same primer ID over n.Create consensus
   consensus = {}
+  id_hash2 = {}
+  id.each do |name,pid|
+    if id_hash2[pid]
+      id_hash2[pid] << name
+    else
+      id_hash2[pid] = []
+      id_hash2[pid] << name
+    end
+  end 
   m = 0
   primer_id_count_over_n.each do |primer_id|
     m += 1
     puts "Now processing number #{m}" if m%100 == 0
-    seq_with_same_primer_id = []
-    id.each do |seq_name,primer_id_test|
-      seq_with_same_primer_id << seq_name if primer_id_test == primer_id
-    end
+    seq_with_same_primer_id = id_hash2[primer_id]
     list_id_part = []
     list_non_id_part = []
     seq_with_same_primer_id.each do |seq_name|
