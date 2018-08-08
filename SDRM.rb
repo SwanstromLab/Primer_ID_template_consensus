@@ -79,7 +79,6 @@ libs.each do |lib|
   
   sub_seq_files.each do |sub_seq|
     seq_basename = File.basename(sub_seq)
-    puts sub_seq
     seqs = fasta_to_hash(sub_seq)
     next if seqs.size == 0
     if seq_basename =~ /V1V3/i
