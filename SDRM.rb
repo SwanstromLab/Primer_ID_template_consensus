@@ -79,6 +79,7 @@ libs.each do |lib|
   
   sub_seq_files.each do |sub_seq|
     seq_basename = File.basename(sub_seq)
+    puts sub_seq
     seqs = fasta_to_hash(sub_seq)
     next if seqs.size == 0
     if seq_basename =~ /V1V3/i
@@ -182,10 +183,8 @@ libs.each do |lib|
   pi_csv = File.readlines(out_r_csv)
   pi_csv.each do |line|
     line.chomp!
-    puts line
     data = line.split(",")
     tag = data[0].split("_")[-1].gsub(/\W/,"")
-    puts tag
     summary_hash[tag] += "," + data[1].to_f.round(4).to_s + "," + data[2].to_f.round(4).to_s
   end
   ["PR", "RT", "IN", "V1V3"].each do |regions|

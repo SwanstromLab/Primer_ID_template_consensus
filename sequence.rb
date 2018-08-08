@@ -852,6 +852,8 @@ def fasta_to_hash(infile)
   return_hash = {}
   name = ""
   while line = f.gets do
+    line.tr!("\u0000","")
+    next if line == "\n"
     if line =~ /^\>/
       name = line.chomp
       return_hash[name] = ""
