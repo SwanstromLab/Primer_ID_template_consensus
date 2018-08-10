@@ -1,5 +1,5 @@
 =begin
-DR version 1.07-07AUG2018
+DR version 1.08-10AUG2018
 based on TCS Pipeline Version 1.38-07AUG2018 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, IN, V1/V3
@@ -10,10 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.07-07AUG2018 based on TCS 1.38-07AUG2018"
+ver = "1.08-10AUG2018 based on TCS 1.38-07AUG2018"
 #############Patch Note#############
 =begin
-  1. Improved performance. 
+  1. Add rescue for :sequence_locator, in case of rare alignment issues.  
 =end
 
 
@@ -493,7 +493,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   elsif ref =~ /(\-+)$/
     l2 = l2 + $1.size
   end
-  
+  l1 = 0 if l1 < 0
   ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
   
   temp_in = File.open(temp_file,"w")
@@ -524,6 +524,8 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
       indel = true
   end
   return [loc_p1,loc_p2,similarity,indel,aln_test,ref]
+rescue
+  return [0,0,0,0,"N","N"]
 end
 
 def fasta_to_hash(infile)

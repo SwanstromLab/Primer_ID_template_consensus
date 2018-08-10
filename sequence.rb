@@ -1693,7 +1693,7 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
   elsif ref =~ /(\-+)$/
     l2 = l2 + $1.size
   end
-  
+  l1 = 0 if l1 < 0
   if (hxb2_l - l2 - 1) >= l1
     ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
     temp_in = File.open(temp_file,"w")
@@ -1728,6 +1728,8 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
   else
     return [0,0,0,0,0,0,0]
   end
+rescue
+  return [0,0,0,0,"N","N"]
 end
 
 #gene cutter. given a specific HXB2 position array [first_position,last_position], return a sequence within the range

@@ -16,7 +16,11 @@
     
 ## Updates
 
-### TCS script Version 1.38-24MAY2018 and DR Version 1.07-24MAY2018
+### DR Version 1.08-10AUG2018
+
+	1. Add rescue for :sequence_locator, in case of rare alignment issues.
+
+### TCS script Version 1.38-08AUG2018 and DR Version 1.07-07AUG2018
 
 	1. Improved performance. 
 
