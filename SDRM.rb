@@ -92,7 +92,7 @@ libs.each do |lib|
       summary_hash["PR"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
-      sdrm = sdrm_pr_bulk(filtered_seq, p_cutoff)
+      sdrm = sdrm_pr_bulk(filtered_seq, p_cutoff, out_lib_dir)
       point_mutation_list += sdrm[0]
       linkage_list += sdrm[1]
       aa_report_list += sdrm[2]
@@ -105,7 +105,7 @@ libs.each do |lib|
       summary_hash["IN"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
-      sdrm = sdrm_in_bulk(filtered_seq, p_cutoff)
+      sdrm = sdrm_in_bulk(filtered_seq, p_cutoff, out_lib_dir)
       point_mutation_list += sdrm[0]
       linkage_list += sdrm[1]
       aa_report_list += sdrm[2]
@@ -129,7 +129,7 @@ libs.each do |lib|
       summary_hash["RT"] = "#{seqs.size.to_s},#{hypermut_seq_keys.size.to_s},#{stop_codon_seq_keys.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
-      sdrm = sdrm_rt_bulk(filtered_seq, p_cutoff)
+      sdrm = sdrm_rt_bulk(filtered_seq, p_cutoff, out_lib_dir)
       point_mutation_list += sdrm[0]
       linkage_list += sdrm[1]
       aa_report_list += sdrm[2]

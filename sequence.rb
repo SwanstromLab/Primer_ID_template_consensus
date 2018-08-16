@@ -2330,8 +2330,8 @@ end
 
 #calculate binomial 95% confidence interval by R. refer to R function binom.test
 #input number x and n, return low and high confidence intervals. 
-def r_binom_CI(x= 0, n= 0)
-  temp_r_result = File.dirname($0) + "/temp_r_result"
+def r_binom_CI(x= 0, n= 0,temp_r_dir = File.dirname($0))
+  temp_r_result = temp_r_dir + "/temp_r_result"
   print `Rscript -e 'binom.test(#{x},#{n})$conf.int[1];binom.test(#{x},#{n})$conf.int[2]' >#{temp_r_result}`
   lines = File.readlines(temp_r_result)
   low = lines[0].chomp[4..-1].to_f
@@ -2344,7 +2344,7 @@ end
 #HIV-1 PR region SDRM based on HIVDB.stanford.edu
 #only for MPID-DR MiSeq sequences, PR codon 1-99
 #return [substitution rate with 95% CI, halpotype abundance with 95% CI, amino acid sequence report spreadsheet]
-def sdrm_pr_bulk(sequences, cutoff = 0)
+def sdrm_pr_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
   region = "PR"
   rf_label = 0
   start_codon_number = 1
@@ -2374,7 +2374,7 @@ def sdrm_pr_bulk(sequences, cutoff = 0)
     mut_list = mutation[1]
     count_mut_list = count(mut_list)
     count_mut_list.each do |m,number|
-      ci = r_binom_CI(number, n_seq)
+      ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
       point_mutation_list << [region, n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
     end
@@ -2396,7 +2396,7 @@ def sdrm_pr_bulk(sequences, cutoff = 0)
   end
   linkage_list = []
   link2.sort_by{|_key,value|value}.reverse.to_h.each do |k,v|
-    ci = r_binom_CI(v, n_seq)
+    ci = r_binom_CI(v, n_seq, temp_r_dir)
     label = v < cutoff ? "*" : ""
     linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
   end
@@ -2436,7 +2436,7 @@ end
 #only for MPID-DR MiSeq sequences
 #RT codon 34-122, 152-236 two regions are linked.
 #return [substitution rate with 95% CI, halpotype abundance with 95% CI, amino acid sequence report spreadsheet]
-def sdrm_rt_bulk(sequences, cutoff = 0)
+def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
   region = "RT"
   rf_label = 1
   start_codon_number = 34
@@ -2486,7 +2486,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0)
     mut_list = mutation[1]
     count_mut_list = count(mut_list)
     count_mut_list.each do |m,number|
-      ci = r_binom_CI(number, n_seq)
+      ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
       point_mutation_list << ["NRTI", n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
     end
@@ -2497,7 +2497,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0)
     mut_list = mutation[1]
     count_mut_list = count(mut_list)
     count_mut_list.each do |m,number|
-      ci = r_binom_CI(number, n_seq)
+      ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
       point_mutation_list << ["NNRTI", n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
     end
@@ -2519,7 +2519,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0)
   end
   linkage_list = []
   link2.sort_by{|_key,value|value}.reverse.to_h.each do |k,v|
-    ci = r_binom_CI(v, n_seq)
+    ci = r_binom_CI(v, n_seq, temp_r_dir)
     label = v < cutoff ? "*" : ""
     linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
   end
@@ -2570,7 +2570,7 @@ end
 #only for MPID-DR MiSeq sequences
 #IN codon 53-174
 #return [substitution rate with 95% CI, halpotype abundance with 95% CI, amino acid sequence report spreadsheet]
-def sdrm_in_bulk(sequences, cutoff = 0)
+def sdrm_in_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
   region = "IN"
   rf_label = 2
   start_codon_number = 53
@@ -2600,7 +2600,7 @@ def sdrm_in_bulk(sequences, cutoff = 0)
     mut_list = mutation[1]
     count_mut_list = count(mut_list)
     count_mut_list.each do |m,number|
-      ci = r_binom_CI(number, n_seq)
+      ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
       point_mutation_list << [region, n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
     end
@@ -2622,7 +2622,7 @@ def sdrm_in_bulk(sequences, cutoff = 0)
   end
   linkage_list = []
   link2.sort_by{|_key,value|value}.reverse.to_h.each do |k,v|
-    ci = r_binom_CI(v, n_seq)
+    ci = r_binom_CI(v, n_seq, temp_r_dir)
     label = v < cutoff ? "*" : ""
     linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
   end
