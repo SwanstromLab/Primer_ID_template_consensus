@@ -156,9 +156,9 @@ libs.each do |lib|
   filtered_seq_files.each do |seq_file|
     bn = File.basename(seq_file)
     temp_file = temp_sampled_seq_dir + "/" + bn
-    temp_out = File.open(temp_file,"w")
     filtered_seq1 = fasta_to_hash(seq_file)
-    next if filtered_seq1 == 1
+    next if filtered_seq1.size < 3
+    temp_out = File.open(temp_file,"w")
     filtered_seq1.keys.sample(1000).each do |k|
       temp_out.puts k + "\n" + filtered_seq1[k]
     end
