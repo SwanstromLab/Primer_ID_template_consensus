@@ -20,7 +20,7 @@ ver = "1.38-07AUG2018"
 #primers = {}
 
 #change set_name, forward primer sequence and cDNA primer sequence. both forward primer sequence and cDNA primer sequence should include the entire sequence, not just biological sequence
-#primers["set_name"] = ["forward primer sequence", "cDNA primer sequence"]
+#primers["set_name"] = ["forward primer sequence", "cDNA primer sequence"] (DO NOT REMOVE # sign from this line)
 #example of primer
 
 #primers["V1V3"] = ["GCCTCCCTCGCGCCATCAGAGATGTGTATAAGAGACAGNNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA","GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC"]
