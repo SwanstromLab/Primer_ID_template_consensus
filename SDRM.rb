@@ -180,18 +180,21 @@ libs.each do |lib|
   r_script_file = out_lib_dir + "/pi.R"
   File.open(r_script_file,"w") {|line| line.puts r_script}
   print `Rscript #{r_script_file} 1> /dev/null 2> /dev/null`
-  pi_csv = File.readlines(out_r_csv)
-  pi_csv.each do |line|
-    line.chomp!
-    data = line.split(",")
-    tag = data[0].split("_")[-1].gsub(/\W/,"")
-    summary_hash[tag] += "," + data[1].to_f.round(4).to_s + "," + data[2].to_f.round(4).to_s
+  if File.exist?(out_r_csv)
+    pi_csv = File.readlines(out_r_csv)
+    pi_csv.each do |line|
+      line.chomp!
+      data = line.split(",")
+      tag = data[0].split("_")[-1].gsub(/\W/,"")
+      summary_hash[tag] += "," + data[1].to_f.round(4).to_s + "," + data[2].to_f.round(4).to_s
+    end
+    ["PR", "RT", "IN", "V1V3"].each do |regions|
+      next unless summary_hash[regions]
+      seq_summary_out.puts regions + "," + summary_hash[regions]
+    end
+    File.unlink(out_r_csv)
   end
-  ["PR", "RT", "IN", "V1V3"].each do |regions|
-    next unless summary_hash[regions]
-    seq_summary_out.puts regions + "," + summary_hash[regions]
-  end
-  File.unlink(r_script_file, out_r_csv)
+  File.unlink(r_script_file)
   print `rm -rf #{temp_sampled_seq_dir}`
 end
 
