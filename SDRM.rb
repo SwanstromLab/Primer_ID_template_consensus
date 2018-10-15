@@ -196,6 +196,7 @@ libs.each do |lib|
   end
   File.unlink(r_script_file)
   print `rm -rf #{temp_sampled_seq_dir}`
+  print `rm -rf #{filtered_seq_dir}`
 end
 
 `touch #{outdir}/.done`
