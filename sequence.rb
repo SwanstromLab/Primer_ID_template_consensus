@@ -25,8 +25,8 @@ class Sequence
       @aa_sequence<< amino_acid(base_3)
     end
   end
-  
-  #get amino acid calls, return a array.keep ambiguity calls. 
+
+  #get amino acid calls, return a array.keep ambiguity calls.
   def get_aa_array(initial_position = 0)
     @aa_array = []
     require_sequence = @dna_sequence[initial_position..-1].tr('-','N')
@@ -70,7 +70,7 @@ def amino_acid (bases)
     return "A"
   when /^TA[TCY]$/
     return "Y"
-  when /^TA[AGR]$/ 
+  when /^TA[AGR]$/
     return "*"
   when /^T[GR]A$/
     return "*"
@@ -129,7 +129,7 @@ def amino_acid_2 (bases)
       end
     end
   end
-  
+
   bases_to_aa.each do |bases|
   case bases
   when /^TT[TCY]$/
@@ -154,7 +154,7 @@ def amino_acid_2 (bases)
     aa =  "A"
   when /^TA[TCY]$/
     aa =  "Y"
-  when /^TA[AGR]$/ 
+  when /^TA[AGR]$/
     aa =  "*"
   when /^T[GR]A$/
     aa =  "*"
@@ -265,18 +265,18 @@ def clustal_score(ref_sequence,test_sequence,open = 15, ext = 6.66)
   gapopen = open
   gapext = ext
   temp_dir = File.dirname($0)
-  
+
   temp_file_in = temp_dir + "/temp_sequence"
-  
+
   ref_name = ref_sequence.name
   ref_seq = ref_sequence.dna_sequence
   test_name = test_sequence.name
   test_seq = test_sequence.dna_sequence
-  
+
   File.open(temp_file_in,'w') do |line|
     line.print "#{ref_name}\n#{ref_seq}\n#{test_name}\n#{test_seq}\n"
   end
-  
+
   temp_file_out = temp_dir + "/temp_out"
   temp_screen_out = temp_dir + "/temp_screen"
   print `/applications/clustalw2 -infile=#{temp_file_in} -case=upper -outorder=input -output=gde -outfile=#{temp_file_out} >#{temp_screen_out} -gapopen=#{gapopen} -gapext=#{gapext}`
@@ -303,18 +303,18 @@ def clustal_seq(ref_sequence,test_sequence,open = 15, ext = 6.66)
   gapopen = open
   gapext = ext
   temp_dir = File.dirname($0)
-  
+
   temp_file_in = temp_dir + "/temp_sequence"
-  
+
   ref_name = ref_sequence.name
   ref_seq = ref_sequence.dna_sequence
   test_name = test_sequence.name
   test_seq = test_sequence.dna_sequence
-  
+
   File.open(temp_file_in,'w') do |line|
     line.print "#{ref_name}\n#{ref_seq}\n#{test_name}\n#{test_seq}\n"
   end
-  
+
   temp_file_out = temp_dir + "/temp_out"
   temp_screen_out = temp_dir + "/temp_screen"
   print `/applications/clustalw2 -infile=#{temp_file_in} -case=upper -outorder=input -output=gde -outfile=#{temp_file_out} >#{temp_screen_out} -gapopen=#{gapopen} -gapext=#{gapext}`
@@ -341,7 +341,7 @@ def clustal_seq(ref_sequence,test_sequence,open = 15, ext = 6.66)
       test_trimmed << base_test
     end
   end
-  
+
   File.unlink temp_file_in
   File.unlink temp_file_out
   File.unlink temp_screen_out
@@ -374,7 +374,7 @@ def clustal_consensus_multi(seq_hash,open = 15, ext = 6.66, gap_treatment = 1)
   f = File.open(temp_file_in,'w')
   f.puts seq_hash.flatten
   f.close
-  
+
   temp_file_out = temp_dir + "/temp_out"
   temp_screen_out = temp_dir + "/temp_screen"
   print `/applications/clustalw2 -infile=#{temp_file_in} -case=upper -outorder=input -output=gde -outfile=#{temp_file_out} >#{temp_screen_out} -gapopen=#{gapopen} -gapext=#{gapext}`
@@ -455,7 +455,7 @@ def creat_consensus_base_gap(base_array_input)
       elsif max_list.include?("G") and max_list.include?("C")
         consensus_base = "S"
       elsif max_list.include?("T") and max_list.include?("G")
-        consensus_base = "M" 
+        consensus_base = "M"
       end
     end
   end
@@ -574,26 +574,26 @@ end
 
 #math defs#
 module Enumerable
-  def median     
+  def median
     len = self.length
     sorted = self.sort
     median = len % 2 == 1 ? sorted[len/2] : (sorted[len/2 - 1] + sorted[len/2]).to_f / 2
-  end 
-  
+  end
+
   def sum
      self.inject(0){|accum, i| accum + i }
   end
-  
+
   def mean
     self.sum/self.length.to_f
   end
-  
+
   def sample_variance
     m = self.mean
     sum = self.inject(0){|accum, i| accum + (i-m)**2 }
     sum/(self.length - 1).to_f
   end
-  
+
   def stdev
     return Math.sqrt(self.sample_variance)
   end
@@ -653,7 +653,7 @@ end
 # Based on JavaScript version created by: Oyvind Langsrud
 # Ported to Ruby by Bryan Donovan
 module Rubystats
-  class FishersExactTest 
+  class FishersExactTest
 
     def initialize
       @sn11    = 0.0
@@ -663,8 +663,8 @@ module Rubystats
       @sprob   = 0.0
 
       @sleft   = 0.0
-      @sright  = 0.0 
-      @sless   = 0.0 
+      @sright  = 0.0
+      @sless   = 0.0
       @slarg   = 0.0
 
       @left    = 0.0
@@ -676,7 +676,7 @@ module Rubystats
     # of the gamma function', J. SIAM Numer. Anal., B, 1, 86-96, 1964."
     # Translation of  Alan Miller's FORTRAN-implementation
     # See http://lib.stat.cmu.edu/apstat/245
-    def lngamm(z) 
+    def lngamm(z)
       x = 0
       x += 0.0000001659470187408462 / (z+7)
       x += 0.000009934937113930748  / (z+6)
@@ -768,8 +768,8 @@ module Rubystats
 
       if p < (1.00000001*prob)
         @sleft += p
-      else 
-        i -= 1	
+      else
+        i -= 1
       end
 
       @sright = 0
@@ -785,11 +785,11 @@ module Rubystats
 
       if p < (1.00000001*prob)
         @sright += p
-      else 
+      else
         j += 1
       end
 
-      if (i - n11).abs < (j - n11).abs 
+      if (i - n11).abs < (j - n11).abs
         @sless = @sleft
         @slarg = 1 - @sleft + prob
       else
@@ -802,8 +802,8 @@ module Rubystats
     def calculate(n11_,n12_,n21_,n22_)
       n11_ *= -1 if n11_ < 0
       n12_ *= -1 if n12_ < 0
-      n21_ *= -1 if n21_ < 0 
-      n22_ *= -1 if n22_ < 0 
+      n21_ *= -1 if n21_ < 0
+      n22_ *= -1 if n22_ < 0
       n1_     = n11_ + n12_
       n_1     = n11_ + n21_
       n       = n11_ + n12_ + n21_ + n22_
@@ -995,7 +995,7 @@ def sdrm_nrti(aa_array,start_aa=1)
           out_hash[position] = [wt_aa,test_aa]
         end
       end
-      
+
     end
   end
   return out_hash
@@ -1033,7 +1033,7 @@ def sdrm_nnrti(aa_array,start_aa=1)
           out_hash[position] = [wt_aa,test_aa]
         end
       end
-      
+
     end
   end
   return out_hash
@@ -1196,7 +1196,7 @@ def sdrm_int(aa_array,start_aa=1)
           out_hash[position] = [wt_aa,test_aa]
         end
       end
-      
+
     end
   end
   return out_hash
@@ -1273,7 +1273,7 @@ def generate_primer_id_pool(l=8)
   nt = ['A','T','C','G']
   pid_pool = ['A','T','C','G']
   (l-1).times do
-    pid_pool = pid_pool.product(nt) 
+    pid_pool = pid_pool.product(nt)
     pid_pool.collect! do |v|
       v.join("")
     end
@@ -1327,7 +1327,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   8.times {head  << (65 + rand(25)).chr}
   temp_file = temp_dir + "/" + head + "_temp"
   temp_aln = temp_dir + "/" + head + "_temp_aln"
-  
+
   l1 = 0
   l2 = 0
   name = ">test"
@@ -1337,7 +1337,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   temp_in.puts name
   temp_in.puts seq
   temp_in.close
-  
+
   print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
   aln_seq = fasta_to_hash(temp_aln)
   aln_test = aln_seq[name]
@@ -1407,7 +1407,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   l1 = l1 + gap_begin
   l2 = l2 + gap_end
   repeat = 0
-  
+
   if g1 == g2 and (s1 + g1 + s2) == ref.size
     if s1 > s2 and g2 > 2*s2
       ref = ref[0..(-g2-1)]
@@ -1428,7 +1428,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
       ref = ref[0..(-g2 - 1)]
       repeat = 1
       l2 = l2 + g2
-    end 
+    end
   end
 
   while repeat == 1
@@ -1468,7 +1468,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     end
   end
   ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
-  
+
   temp_in = File.open(temp_file,"w")
   temp_in.puts ">ref"
   temp_in.puts ref
@@ -1479,15 +1479,15 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   aln_seq = fasta_to_hash(temp_aln)
   aln_test = aln_seq[name]
   ref = aln_seq[">ref"]
-  
+
   #refine alignment
-  
+
   if ref =~ /^(\-+)/
     l1 = l1 - $1.size
   elsif ref =~ /(\-+)$/
     l2 = l2 + $1.size
   end
-  
+
   if (hxb2_l - l2 - 1) >= l1
     ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
     temp_in = File.open(temp_file,"w")
@@ -1500,7 +1500,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     aln_seq = fasta_to_hash(temp_aln)
     aln_test = aln_seq[name]
     ref = aln_seq[">ref"]
-    
+
     ref_size = ref.size
     sim_count = 0
     (0..(ref_size-1)).each do |n|
@@ -1533,7 +1533,7 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
   8.times {head  << (65 + rand(25)).chr}
   temp_file = temp_dir + "/temp"
   temp_aln = temp_dir + "/temp_aln"
-  
+
   l1 = 0
   l2 = 0
   name = ">test"
@@ -1543,7 +1543,7 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
   temp_in.puts name
   temp_in.puts seq
   temp_in.close
-  
+
   print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
   aln_seq = fasta_to_hash(temp_aln)
   aln_test = aln_seq[name]
@@ -1613,7 +1613,7 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
   l1 = l1 + gap_begin
   l2 = l2 + gap_end
   repeat = 0
-  
+
   if g1 == g2 and (s1 + g1 + s2) == ref.size
     if s1 > s2 and g2 > 2*s2
       ref = ref[0..(-g2-1)]
@@ -1634,7 +1634,7 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
       ref = ref[0..(-g2 - 1)]
       repeat = 1
       l2 = l2 + g2
-    end 
+    end
   end
 
   while repeat == 1
@@ -1674,7 +1674,7 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
     end
   end
   ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
-  
+
   temp_in = File.open(temp_file,"w")
   temp_in.puts ">ref"
   temp_in.puts ref
@@ -1685,9 +1685,9 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
   aln_seq = fasta_to_hash(temp_aln)
   aln_test = aln_seq[name]
   ref = aln_seq[">ref"]
-  
+
   #refine alignment
-  
+
   if ref =~ /^(\-+)/
     l1 = l1 - $1.size
   elsif ref =~ /(\-+)$/
@@ -1706,7 +1706,7 @@ def NL43_locator(seq="",temp_dir=File.dirname($0))
     aln_seq = fasta_to_hash(temp_aln)
     aln_test = aln_seq[name]
     ref = aln_seq[">ref"]
-    
+
     ref_size = ref.size
     sim_count = 0
     (0..(ref_size-1)).each do |n|
@@ -1871,7 +1871,7 @@ def collapse_sequence_by_x_nt_difference(seq_array,cutoff)
                 freq1 >= freq2 ? dupli_seq << seq2 : dupli_seq << seq1
             end
         end
-    
+
         seq_freq.each do |seq,freq|
             unless dupli_seq.include?(seq)
                 new_seq_freq[seq] = freq
@@ -1992,9 +1992,9 @@ def filter_similar_pid(sequence_file = "", cutoff = 10)
           uni_seq_pid[k] << [name.split("_")[0],name.split("_")[1]]
         end
       end
-    end 
+    end
   end
-  
+
   dup_pid = []
   uni_seq_pid.values.each do |v|
     next if v.size == 1
@@ -2002,15 +2002,15 @@ def filter_similar_pid(sequence_file = "", cutoff = 10)
     list = pid_hash.keys
     list2 = Array.new(list)
     pairs = []
-  
+
     list.each do |k|
       list2.delete(k)
       list2.each do |k1|
         pairs << [k,k1]
       end
     end
-    
-  
+
+
     pairs.each do |p|
       pid1 = p[0]
       pid2 = p[1]
@@ -2027,8 +2027,8 @@ def filter_similar_pid(sequence_file = "", cutoff = 10)
       end
     end
   end
-  
-  
+
+
   new_seq = {}
   seq.each do |name,s|
     pid = name.split("_")[0][1..-1]
@@ -2163,7 +2163,7 @@ def consensus(seq_array, cutoff = 0.5)
     end
     base_count = count(all_base)
     max_base_list = []
-  
+
     base_count.each do |k,v|
       if v/seq_size.to_f >= cutoff
         max_base_list << k
@@ -2176,7 +2176,7 @@ end
 
 =begin
 subtract one hash (h2) from the other (h1) if the keys are identical
-example: 
+example:
 h1 = {"Cat" => 100, "Dog" => 5, "Bird" => 2, "Snake" => 10}
 h2 = {"Cat" => 100, "Dog" => 5, "Bison" => 30}
 h1.difference(h2) = {"Bird" => 2, "Snake" => 10}
@@ -2208,18 +2208,18 @@ def a3g_hypermut_seq_hash(seq_hash)
   mut_hash = {}
   hm_hash = {}
   out_hash = {}
-  
+
   #total G->A mutations at apobec3g/f positions.
   total = 0
-  
+
   #make specimen consensus
   ref = consensus_without_alignment(seq_hash.values)
-  
+
   #obtain apobec3g positions and control positions
   apobec = apobec3gf(ref)
   mut = apobec[0]
   control = apobec[1]
-  
+
   seq_hash.each do |k,v|
     a = 0 #muts
     b = 0 #potential mut sites
@@ -2236,7 +2236,7 @@ def a3g_hypermut_seq_hash(seq_hash)
     end
     mut_hash[k] = a
     total += a
-    
+
     control.each do |n|
       next if v[n] == "-"
       if v[n] == "A"
@@ -2247,27 +2247,27 @@ def a3g_hypermut_seq_hash(seq_hash)
       end
     end
     rr = (a/b.to_f)/(c/d.to_f)
-    
+
     t1 = b - a
     t2 = d - c
-    
+
     fet = Rubystats::FishersExactTest.new
     fisher = fet.calculate(t1,t2,a,c)
     perc = fisher[:twotail]
     info = k + "," + a.to_s + "," + b.to_s + "," + c.to_s + "," + d.to_s + "," + rr.round(2).to_s + "," + perc.to_s
     out_hash[k] = info
     if perc < 0.05
-      hm_hash[k] = info 
+      hm_hash[k] = info
     end
   end
-  
+
   rate = total.to_f/(seq_hash.size)
-  
+
   count_mut = count(mut_hash.values)
   maxi_count = count_mut.values.max
-  
+
   poisson_hash = poisson_distribution(rate,maxi_count)
-  
+
   cut_off = 0
   poisson_hash.each do |k,v|
     cal = seq_hash.size * v
@@ -2279,13 +2279,13 @@ def a3g_hypermut_seq_hash(seq_hash)
       cut_off = maxi_count
     end
   end
-  
+
   mut_hash.each do |k,v|
     if v > cut_off
       hm_hash[k] = out_hash[k]
     end
   end
-  
+
   hm_seq_hash = {}
   hm_hash.keys.each do |k|
     hm_seq_hash[k] = seq_hash[k]
@@ -2293,7 +2293,7 @@ def a3g_hypermut_seq_hash(seq_hash)
   return [hm_seq_hash,hm_hash]
 end
 
-#input a sequence hash, return a sequence hash with stop codons. 
+#input a sequence hash, return a sequence hash with stop codons.
 def stop_codon_seq_hash(seq_hash, rf = 0)
   out_seq_hash = {}
   seq_hash.each do |k,v|
@@ -2316,7 +2316,7 @@ def poisson_minority_cutoff(seq_array, error_rate = 0.0001, fold_cutoff = 20)
   count_mut = variant_for_poisson(seq_array)
   max_count = count_mut.keys.max
   poisson_hash = poisson_distribution(rate, max_count)
-  
+
   poisson_hash.each do |k,v|
     cal = l * v
     obs = count_mut[k] ? count_mut[k] : 0
@@ -2329,7 +2329,7 @@ def poisson_minority_cutoff(seq_array, error_rate = 0.0001, fold_cutoff = 20)
 end
 
 #calculate binomial 95% confidence interval by R. refer to R function binom.test
-#input number x and n, return low and high confidence intervals. 
+#input number x and n, return low and high confidence intervals.
 def r_binom_CI(x= 0, n= 0,temp_r_dir = File.dirname($0))
   temp_r_result = temp_r_dir + "/temp_r_result"
   print `Rscript -e 'binom.test(#{x},#{n})$conf.int[1];binom.test(#{x},#{n})$conf.int[2]' >#{temp_r_result}`
@@ -2380,7 +2380,7 @@ def sdrm_pr_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     end
   end
   point_mutation_list.sort_by! {|record| record[2]}
- 
+
   link = count(mut_com)
   link2 = {}
   link.each do |k,v|
@@ -2400,14 +2400,14 @@ def sdrm_pr_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     label = v < cutoff ? "*" : ""
     linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
   end
-  
+
   report_list = []
-  
+
   div_aa = {}
   aa_start = start_codon_number
-  
+
   aa_size = aa.values[0].size - 1
-  
+
   (0..aa_size).to_a.each do |p|
     aas = []
     aa.values.each do |r1|
@@ -2417,7 +2417,7 @@ def sdrm_pr_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     div_aa[aa_start] = count_aas.sort_by{|k,v|v}.reverse.to_h
     aa_start += 1
   end
-  
+
   div_aa.each do |k,v|
     record = [region, k, n_seq]
     $amino_acid_list.each do |amino_acid|
@@ -2426,7 +2426,7 @@ def sdrm_pr_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     end
     report_list << record
   end
-  
+
   return [point_mutation_list, linkage_list, report_list]
 end
 
@@ -2441,7 +2441,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
   rf_label = 1
   start_codon_number = 34
   gap = "AGACTTCAGGAAGTATACTGCATTTACCATACCTAGTATAAACAATGAGACACCAGGGATTAGATATCAGTACAATGTGCTTCCAC"
-  
+
   n_seq = sequences.size
   mut_nrti = {}
   mut_nnrti = {}
@@ -2456,13 +2456,13 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     s = Sequence.new(name,seq)
     s.get_aa_array(rf_label)
     aa_seq = s.aa_array
-    
+
     r1_aa[name] = aa_seq[0,89].join("")
     r2_aa[name] = aa_seq[85..-1].join("")
     nrti = sdrm_nrti(aa_seq,start_codon_number)
     nnrti = sdrm_nnrti(aa_seq,start_codon_number)
     mut_com << (nrti.merge(nnrti))
-  
+
     nrti.each do |position,mutation|
       if mut_nrti[position]
         mut_nrti[position][1] << mutation[1]
@@ -2480,7 +2480,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
       end
     end
   end
-  
+
   mut_nrti.each do |position,mutation|
     wt = mutation[0]
     mut_list = mutation[1]
@@ -2491,7 +2491,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
       point_mutation_list << ["NRTI", n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
     end
   end
-  
+
   mut_nnrti.each do |position,mutation|
     wt = mutation[0]
     mut_list = mutation[1]
@@ -2503,7 +2503,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     end
   end
   point_mutation_list.sort_by! {|record| record[2]}
-  
+
   link = count(mut_com)
   link2 = {}
   link.each do |k,v|
@@ -2523,16 +2523,16 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     label = v < cutoff ? "*" : ""
     linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
   end
-  
+
   report_list = []
-  
+
   div_aa = {}
   r1_aa_start = 34
   r2_aa_start = 152
-  
+
   r1_aa_size = r1_aa.values[0].size - 1
   r2_aa_size = r2_aa.values[0].size - 1
-  
+
   (0..r1_aa_size).to_a.each do |p|
     aas = []
     r1_aa.values.each do |r1|
@@ -2542,7 +2542,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     div_aa[r1_aa_start] = count_aas.sort_by{|k,v|v}.reverse.to_h
     r1_aa_start += 1
   end
-  
+
   (0..r2_aa_size).to_a.each do |p|
     aas = []
     r2_aa.values.each do |r1|
@@ -2552,7 +2552,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     div_aa[r2_aa_start] = count_aas.sort_by{|k,v|v}.reverse.to_h
     r2_aa_start += 1
   end
-  
+
   div_aa.each do |k,v|
     record = [region, k, n_seq]
     $amino_acid_list.each do |amino_acid|
@@ -2561,7 +2561,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     end
     report_list << record
   end
-  
+
   return [point_mutation_list, linkage_list, report_list]
 end
 
@@ -2606,7 +2606,7 @@ def sdrm_in_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     end
   end
   point_mutation_list.sort_by! {|record| record[2]}
- 
+
   link = count(mut_com)
   link2 = {}
   link.each do |k,v|
@@ -2626,14 +2626,14 @@ def sdrm_in_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     label = v < cutoff ? "*" : ""
     linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
   end
-  
+
   report_list = []
-  
+
   div_aa = {}
   aa_start = start_codon_number
-  
+
   aa_size = aa.values[0].size - 1
-  
+
   (0..aa_size).to_a.each do |p|
     aas = []
     aa.values.each do |r1|
@@ -2643,7 +2643,7 @@ def sdrm_in_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     div_aa[aa_start] = count_aas.sort_by{|k,v|v}.reverse.to_h
     aa_start += 1
   end
-  
+
   div_aa.each do |k,v|
     record = [region, k, n_seq]
     $amino_acid_list.each do |amino_acid|
@@ -2652,7 +2652,7 @@ def sdrm_in_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     end
     report_list << record
   end
-  
+
   return [point_mutation_list, linkage_list, report_list]
 end
 
@@ -2677,4 +2677,29 @@ def shannons_entropy(sequences)
     entropy_hash[(position + 1)] = entropy
   end
   return entropy_hash
+end
+
+#TN93 distance function. Input: sequence array, output hash: diff => counts
+def TN93(sequence_array = [])
+  diff = []
+  seq_hash = count(sequence_array)
+  seq_hash.values.each do |v|
+    comb = v * (v - 1) / 2
+    comb.times {diff << 0}
+  end
+
+  seq_hash.keys.combination(2).to_a.each do |pair|
+    s1 = pair[0]
+    s2 = pair[1]
+    diff_temp = compare_two_seq(s1,s2)
+    comb = seq_hash[s1] * seq_hash[s2]
+    comb.times {diff << diff_temp}
+  end
+
+  count_diff = count(diff)
+  out_hash = Hash.new(0)
+  Hash[count_diff.sort_by{|k,v|k}].each do |k,v|
+    out_hash[k] = v
+  end
+  return out_hash
 end
