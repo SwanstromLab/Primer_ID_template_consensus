@@ -18,7 +18,7 @@ class Sequence
     @aa_sequence = ""
     require_sequence = @dna_sequence[initial_position..-1]
     base_array = []
-    require_sequence.each_char {|base| base_array<<base}
+    require_sequence.each_char {|base| base_array << base}
     while (base_array.length>=3) do
       base_3= ""
       3.times{base_3 += base_array.shift}
@@ -31,7 +31,7 @@ class Sequence
     @aa_array = []
     require_sequence = @dna_sequence[initial_position..-1].tr('-','N')
     base_array = []
-    require_sequence.each_char {|base| base_array<<base}
+    require_sequence.each_char {|base| base_array << base}
     while (base_array.length>=3) do
       base_3= ""
       3.times{base_3 += base_array.shift}
@@ -2310,22 +2310,26 @@ end
 #Input is a sequence array, the redisual sequencing error rate (default = 0.0001), and a fold cut-off to determine the cut-off
 #example: cut-off = 2 means that mutations appear at least 2 times are very likely to be a true mutation instead of residual methods errors.
 def poisson_minority_cutoff(seq_array, error_rate = 0.0001, fold_cutoff = 20)
-  cut_off = 1
-  l = seq_array[0].size
-  rate = seq_array.size * error_rate
-  count_mut = variant_for_poisson(seq_array)
-  max_count = count_mut.keys.max
-  poisson_hash = poisson_distribution(rate, max_count)
+  if seq_array.size == 0
+    return 0
+  else
+    cut_off = 1
+    l = seq_array[0].size
+    rate = seq_array.size * error_rate
+    count_mut = variant_for_poisson(seq_array)
+    max_count = count_mut.keys.max
+    poisson_hash = poisson_distribution(rate, max_count)
 
-  poisson_hash.each do |k,v|
-    cal = l * v
-    obs = count_mut[k] ? count_mut[k] : 0
-    if obs >= fold_cutoff * cal
-      cut_off = k
-      break
+    poisson_hash.each do |k,v|
+      cal = l * v
+      obs = count_mut[k] ? count_mut[k] : 0
+      if obs >= fold_cutoff * cal
+        cut_off = k
+        break
+      end
     end
+    return cut_off
   end
-  return cut_off
 end
 
 #calculate binomial 95% confidence interval by R. refer to R function binom.test

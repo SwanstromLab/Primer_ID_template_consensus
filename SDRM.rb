@@ -6,7 +6,7 @@ require_relative "sequence"
 #require MUSCLE, define path_to_muscle
 $path_to_muscle = "muscle"
 
-R_SCRIPT = 'setwd("PATH_TO_FASTA") 
+R_SCRIPT = 'setwd("PATH_TO_FASTA")
 library(phangorn)
 library(ape)
 library(ggplot2)
@@ -17,7 +17,7 @@ library(magrittr)
 library(gridExtra)
 pdf("OUTPUT_PDF", onefile=T, width=6, height=4)
 fileNames <- list.files()
-for (fileName in fileNames) {  
+for (fileName in fileNames) {
 dna <- read.dna(fileName, format="fasta")
 class(dna)
 D<- dist.dna(dna, model="raw")
@@ -29,7 +29,7 @@ D2 <- dist.dna(dna, model="TN93")*100
 def.par <- par(no.readonly = TRUE)
 par(mfrow=c(1,2))
 hist<-hist(D, main=fileName, xlab="% Pairwise Distance", ylab="Frequency", col="gray")
-abline(v=dist20, col="royalblue",lwd=2) 
+abline(v=dist20, col="royalblue",lwd=2)
 abline(v=pi, col="red", lwd=2)
 legend(x="topright", c("dist20", "pi"), col = c("royalblue", "red"), lwd = c(2,2), cex=0.5)
 njtree<-NJ(D2)
@@ -53,30 +53,30 @@ libs.each do |lib|
   seq_summary_file = out_lib_dir + "/" + lib_name + "_summary.csv"
   seq_summary_out = File.open(seq_summary_file, "w")
   seq_summary_out.puts "Region,TCS,TCS with A3G/F hypermutation,TCS with stop codon,TCS w/o hypermutation and stop codon, Poisson cutoff for minority mutation (>=),Pi,Dist20"
-  
+
   point_mutation_file = out_lib_dir + "/" + lib_name + "_substitution.csv"
   point_mutation_out = File.open(point_mutation_file, "w")
   point_mutation_out.puts "region,TCS,AA position,wild type,mutation,number,percentage,95% CI low, 95% CI high, notes"
-  
+
   linkage_file = out_lib_dir + "/" + lib_name + "_linkage.csv"
   linkage_out = File.open(linkage_file, "w")
   linkage_out.puts "region,TCS,mutation linkage,number,percentage,95% CI low, 95% CI high, notes"
-  
+
   aa_report_file = out_lib_dir + "/" + lib_name + "_aa.csv"
   aa_report_out = File.open(aa_report_file, "w")
   aa_report_out.puts "region,ref.aa.positions,TCS.number," + $amino_acid_list.join(",")
-  
+
   filtered_seq_dir = out_lib_dir + "/" + lib_name + "_filtered_seq"
   Dir.mkdir(filtered_seq_dir) unless File.directory?(filtered_seq_dir)
-  
+
   aln_seq_dir = out_lib_dir + "/" + lib_name + "_aln_seq"
   Dir.mkdir(aln_seq_dir) unless File.directory?(aln_seq_dir)
-  
+
   point_mutation_list = []
   linkage_list = []
   aa_report_list = []
   summary_hash = {}
-  
+
   sub_seq_files.each do |sub_seq|
     seq_basename = File.basename(sub_seq)
     seqs = fasta_to_hash(sub_seq)
@@ -90,6 +90,7 @@ libs.each do |lib|
       filtered_seq = seqs.difference(hypermut_seq).difference(stop_codon_seq)
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
       summary_hash["PR"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
+      next if filtered_seq.size == 0
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_pr_bulk(filtered_seq, p_cutoff, out_lib_dir)
@@ -103,6 +104,7 @@ libs.each do |lib|
       filtered_seq = seqs.difference(hypermut_seq).difference(stop_codon_seq)
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
       summary_hash["IN"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
+      next if filtered_seq.size == 0
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_in_bulk(filtered_seq, p_cutoff, out_lib_dir)
@@ -127,6 +129,7 @@ libs.each do |lib|
       filtered_seq = seqs.reject {|k,v| reject_keys.include?(k) }
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
       summary_hash["RT"] = "#{seqs.size.to_s},#{hypermut_seq_keys.size.to_s},#{stop_codon_seq_keys.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
+      next if filtered_seq.size == 0
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_rt_bulk(filtered_seq, p_cutoff, out_lib_dir)
@@ -136,7 +139,7 @@ libs.each do |lib|
       filtered_out.close
     end
   end
- 
+
   point_mutation_list.each do |record|
     point_mutation_out.puts record.join(",")
   end
@@ -146,13 +149,13 @@ libs.each do |lib|
   aa_report_list.each do |record|
     aa_report_out.puts record.join(",")
   end
-  
+
   filtered_seq_files = Dir[filtered_seq_dir + "/*"]
   next if filtered_seq_files.size == 0
-  
+
   temp_sampled_seq_dir = out_lib_dir + "/" + lib_name + "_temp_seq"
   Dir.mkdir(temp_sampled_seq_dir) unless File.directory?(temp_sampled_seq_dir)
-  
+
   filtered_seq_files.each do |seq_file|
     bn = File.basename(seq_file)
     temp_file = temp_sampled_seq_dir + "/" + bn
@@ -164,12 +167,12 @@ libs.each do |lib|
     end
     temp_out.close
   end
-  
+
   temp_seq_files = Dir[temp_sampled_seq_dir + "/*"]
   temp_seq_files.each do |seq_file|
     print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -maxiters 2 -quiet`
   end
-  
+
   r_script.gsub!(/PATH_TO_FASTA/,aln_seq_dir)
   out_r_csv = out_lib_dir + "/" + lib_name + "_pi.csv"
   out_r_pdf = out_lib_dir + "/" + lib_name + "_pi.pdf"
