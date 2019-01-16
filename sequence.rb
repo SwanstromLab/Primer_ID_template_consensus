@@ -2707,3 +2707,29 @@ def TN93(sequence_array = [])
   end
   return out_hash
 end
+
+
+# gap strip from a sequence alignment
+
+def gap_strip(sequence_alignment)
+  new_seq_hash = {}
+  seq_size = sequence_alignment.values[0].size
+  seq_matrix = {}
+  (0..(seq_size - 1)).each do |p|
+    seq_matrix[p] = []
+    sequence_alignment.values.each do |s|
+      seq_matrix[p] << s[p]
+    end
+  end
+
+  seq_matrix.delete_if do |p, list|
+    list.include?("-")
+  end
+
+  sequence_alignment.each do |n,s|
+    new_s = ""
+    seq_matrix.keys.each {|p| new_s += s[p]}
+    new_seq_hash[n] = new_s
+  end
+  return new_seq_hash
+end
