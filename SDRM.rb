@@ -66,6 +66,9 @@ libs.each do |lib|
   aa_report_out = File.open(aa_report_file, "w")
   aa_report_out.puts "region,ref.aa.positions,TCS.number," + $amino_acid_list.join(",")
 
+  summary_line_file = out_lib_dir + "/" + lib_name + ".csv"
+  line_out = File.open(summary_line_file,"w")
+
   filtered_seq_dir = out_lib_dir + "/" + lib_name + "_filtered_seq"
   Dir.mkdir(filtered_seq_dir) unless File.directory?(filtered_seq_dir)
 
@@ -80,7 +83,7 @@ libs.each do |lib|
   sub_seq_files.each do |sub_seq|
     seq_basename = File.basename(sub_seq)
     seqs = fasta_to_hash(sub_seq)
-    next if seqs.size == 0
+    next if seqs.size < 3
     if seq_basename =~ /V1V3/i
       summary_hash["V1V3"] = "#{seqs.size.to_s},NA,NA,NA,NA"
       print `cp #{sub_seq} #{filtered_seq_dir}`
@@ -90,7 +93,7 @@ libs.each do |lib|
       filtered_seq = seqs.difference(hypermut_seq).difference(stop_codon_seq)
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
       summary_hash["PR"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
-      next if filtered_seq.size == 0
+      next if filtered_seq.size < 3
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_pr_bulk(filtered_seq, p_cutoff, out_lib_dir)
@@ -104,7 +107,7 @@ libs.each do |lib|
       filtered_seq = seqs.difference(hypermut_seq).difference(stop_codon_seq)
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
       summary_hash["IN"] = "#{seqs.size.to_s},#{hypermut_seq.size.to_s},#{stop_codon_seq.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
-      next if filtered_seq.size == 0
+      next if filtered_seq.size < 3
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_in_bulk(filtered_seq, p_cutoff, out_lib_dir)
@@ -129,7 +132,7 @@ libs.each do |lib|
       filtered_seq = seqs.reject {|k,v| reject_keys.include?(k) }
       p_cutoff = poisson_minority_cutoff(filtered_seq.values, 0.0001, 20)
       summary_hash["RT"] = "#{seqs.size.to_s},#{hypermut_seq_keys.size.to_s},#{stop_codon_seq_keys.size.to_s},#{filtered_seq.size.to_s},#{p_cutoff.to_s}"
-      next if filtered_seq.size == 0
+      next if filtered_seq.size < 3
       filtered_out = File.open((filtered_seq_dir + "/" + seq_basename), "w")
       filtered_seq.each {|k,v| filtered_out.puts k; filtered_out.puts v}
       sdrm = sdrm_rt_bulk(filtered_seq, p_cutoff, out_lib_dir)
@@ -151,55 +154,130 @@ libs.each do |lib|
   end
 
   filtered_seq_files = Dir[filtered_seq_dir + "/*"]
-  next if filtered_seq_files.size == 0
 
-  temp_sampled_seq_dir = out_lib_dir + "/" + lib_name + "_temp_seq"
-  Dir.mkdir(temp_sampled_seq_dir) unless File.directory?(temp_sampled_seq_dir)
+  if filtered_seq_files.size > 0
 
-  filtered_seq_files.each do |seq_file|
-    bn = File.basename(seq_file)
-    temp_file = temp_sampled_seq_dir + "/" + bn
-    filtered_seq1 = fasta_to_hash(seq_file)
-    next if filtered_seq1.size < 3
-    temp_out = File.open(temp_file,"w")
-    filtered_seq1.keys.sample(1000).each do |k|
-      temp_out.puts k + "\n" + filtered_seq1[k]
+    temp_sampled_seq_dir = out_lib_dir + "/" + lib_name + "_temp_seq"
+    Dir.mkdir(temp_sampled_seq_dir) unless File.directory?(temp_sampled_seq_dir)
+
+    filtered_seq_files.each do |seq_file|
+      bn = File.basename(seq_file)
+      temp_file = temp_sampled_seq_dir + "/" + bn
+      filtered_seq1 = fasta_to_hash(seq_file)
+      next if filtered_seq1.size < 3
+      temp_out = File.open(temp_file,"w")
+      filtered_seq1.keys.sample(1000).each do |k|
+        temp_out.puts k + "\n" + filtered_seq1[k]
+      end
+      temp_out.close
     end
-    temp_out.close
+
+    temp_seq_files = Dir[temp_sampled_seq_dir + "/*"]
+    temp_seq_files.each do |seq_file|
+      print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -maxiters 2 -quiet`
+    end
+
+    r_script.gsub!(/PATH_TO_FASTA/,aln_seq_dir)
+    out_r_csv = out_lib_dir + "/" + lib_name + "_pi.csv"
+    out_r_pdf = out_lib_dir + "/" + lib_name + "_pi.pdf"
+    File.unlink(out_r_csv) if File.exist?(out_r_csv)
+    File.unlink(out_r_pdf) if File.exist?(out_r_pdf)
+    r_script.gsub!(/OUTPUT_CSV/,out_r_csv)
+    r_script.gsub!(/OUTPUT_PDF/,out_r_pdf)
+    r_script_file = out_lib_dir + "/pi.R"
+    File.open(r_script_file,"w") {|line| line.puts r_script}
+    print `Rscript #{r_script_file} 1> /dev/null 2> /dev/null`
+    if File.exist?(out_r_csv)
+      pi_csv = File.readlines(out_r_csv)
+      pi_csv.each do |line|
+        line.chomp!
+        data = line.split(",")
+        tag = data[0].split("_")[-1].gsub(/\W/,"")
+        summary_hash[tag] += "," + data[1].to_f.round(4).to_s + "," + data[2].to_f.round(4).to_s
+      end
+      ["PR", "RT", "IN", "V1V3"].each do |regions|
+        next unless summary_hash[regions]
+        seq_summary_out.puts regions + "," + summary_hash[regions]
+      end
+      File.unlink(out_r_csv)
+    end
+    File.unlink(r_script_file)
+    print `rm -rf #{temp_sampled_seq_dir}`
+    print `rm -rf #{filtered_seq_dir}`
   end
 
-  temp_seq_files = Dir[temp_sampled_seq_dir + "/*"]
-  temp_seq_files.each do |seq_file|
-    print `#{$path_to_muscle} -in #{seq_file} -out #{aln_seq_dir + "/" + File.basename(seq_file)} -maxiters 2 -quiet`
+  seq_summary_out.close
+  point_mutation_out.close
+  linkage_out.close
+  aa_report_out.close
+
+  summary_lines = File.readlines(seq_summary_file)
+
+  summary_lines.shift
+  tcs_PR = 0
+  tcs_RT = 0
+  tcs_IN = 0
+  tcs_V1V3 = 0
+  pi_RT = 0.0
+  pi_V1V3 = 0.0
+  dist20_RT = 0.0
+  dist20_V1V3 = 0.0
+  recency = ""
+
+  summary_lines.each do |line|
+      data = line.chomp.split(",")
+      if data[0] == "PR"
+          tcs_PR = data[4].to_i
+      elsif data[0] == "RT"
+          tcs_RT = data[4].to_i
+          pi_RT = data[6].to_f
+          dist20_RT = data[7].to_f
+      elsif data[0] == "IN"
+          tcs_IN = data[4].to_i
+      elsif data[0] == "V1V3"
+          tcs_V1V3 = data[1].to_i
+          pi_V1V3 = data[6].to_f
+          dist20_V1V3 = data[7].to_f
+      end
+  end
+  if tcs_RT >= 3 and tcs_V1V3 >= 3
+    if (pi_RT + pi_V1V3) < 0.0103
+        recency = "recent"
+    elsif (pi_RT + pi_V1V3) >= 0.0103 and (dist20_RT + dist20_V1V3) >= 0.006
+        recency = "chronic"
+    else
+        recency = "possible duel"
+    end
+  elsif tcs_RT >= 3 and tcs_V1V3 < 3
+    if pi_RT < 0.0021
+      recency = "RT only recent"
+    elsif pi_RT >= 0.0021 and dist20_RT >= 0.001
+      recency = "RT only chronic"
+    else
+      recency = "RT only possible duel"
+    end
+  else
+    recency = "? (RT missing)"
   end
 
-  r_script.gsub!(/PATH_TO_FASTA/,aln_seq_dir)
-  out_r_csv = out_lib_dir + "/" + lib_name + "_pi.csv"
-  out_r_pdf = out_lib_dir + "/" + lib_name + "_pi.pdf"
-  File.unlink(out_r_csv) if File.exist?(out_r_csv)
-  File.unlink(out_r_pdf) if File.exist?(out_r_pdf)
-  r_script.gsub!(/OUTPUT_CSV/,out_r_csv)
-  r_script.gsub!(/OUTPUT_PDF/,out_r_pdf)
-  r_script_file = out_lib_dir + "/pi.R"
-  File.open(r_script_file,"w") {|line| line.puts r_script}
-  print `Rscript #{r_script_file} 1> /dev/null 2> /dev/null`
-  if File.exist?(out_r_csv)
-    pi_csv = File.readlines(out_r_csv)
-    pi_csv.each do |line|
-      line.chomp!
-      data = line.split(",")
-      tag = data[0].split("_")[-1].gsub(/\W/,"")
-      summary_hash[tag] += "," + data[1].to_f.round(4).to_s + "," + data[2].to_f.round(4).to_s
-    end
-    ["PR", "RT", "IN", "V1V3"].each do |regions|
-      next unless summary_hash[regions]
-      seq_summary_out.puts regions + "," + summary_hash[regions]
-    end
-    File.unlink(out_r_csv)
+  sdrm_lines = File.readlines(point_mutation_file)
+  sdrm_lines.shift
+  sdrm_PR = ""
+  sdrm_RT = ""
+  sdrm_IN = ""
+  sdrm_lines.each do |line|
+      data = line.chomp.split(",")
+      next if data[-1] == "*"
+      if data[0] == "PR"
+          sdrm_PR += data[3] + data[2] + data[4] + ":" + (data[6].to_f * 100).round(2).to_s + "(" + (data[7].to_f * 100).round(2).to_s + "-" + (data[8].to_f * 100).round(2).to_s + "); "
+      elsif data[0] =~ /NRTI/
+          sdrm_RT += data[3] + data[2] + data[4] + ":" + (data[6].to_f * 100).round(2).to_s + "(" + (data[7].to_f * 100).round(2).to_s + "-" + (data[8].to_f * 100).round(2).to_s + "); "
+      elsif data[0] == "IN"
+          sdrm_IN += data[3] + data[2] + data[4] + ":" + (data[6].to_f * 100).round(2).to_s + "(" + (data[7].to_f * 100).round(2).to_s + "-" + (data[8].to_f * 100).round(2).to_s + "); "
+      end
   end
-  File.unlink(r_script_file)
-  print `rm -rf #{temp_sampled_seq_dir}`
-  print `rm -rf #{filtered_seq_dir}`
+  line_out.print [tcs_PR.to_s,tcs_RT.to_s,tcs_IN.to_s,tcs_V1V3.to_s,pi_RT.to_s,pi_V1V3.to_s,dist20_RT.to_s,dist20_V1V3.to_s,recency,sdrm_PR,sdrm_RT,sdrm_IN].join(",") + "\n"
+  line_out.close
 end
 
 `touch #{outdir}/.done`
