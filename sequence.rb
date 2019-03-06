@@ -866,6 +866,19 @@ def fasta_to_hash(infile)
   return return_hash
 end
 
+# convert fasta file into relaxed sequencial phylip format
+def fasta_hash_to_rsphylip(seqs)
+  outline = ""
+  names = seqs.keys
+  max_name_l = (names.max.size - 1)
+  max_name_l > 10 ? name_block_l = max_name_l : name_block_l = 10
+  seqs.each do |k,v|
+    outline += k[1..-1] + "\s" * (name_block_l - k.size + 2) + v.scan(/.{1,10}/).join("\s") + "\n"
+  end
+  return outline
+end
+
+
 #fastq file to fasta, discard quality, return a sequence hash
 def fastq_to_fasta(fastq_file)
     count = 0
