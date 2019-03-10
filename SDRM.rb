@@ -66,7 +66,7 @@ libs.each do |lib|
   aa_report_out = File.open(aa_report_file, "w")
   aa_report_out.puts "region,ref.aa.positions,TCS.number," + $amino_acid_list.join(",")
 
-  summary_line_file = out_lib_dir + "/" + lib_name + ".csv"
+  summary_line_file = out_lib_dir + "/" + lib_name + "_lines.csv"
   line_out = File.open(summary_line_file,"w")
 
   filtered_seq_dir = out_lib_dir + "/" + lib_name + "_filtered_seq"
