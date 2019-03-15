@@ -1864,7 +1864,7 @@ def muscle_sequence2(ref_seq = "", test_seq = "", temp_dir=File.dirname($0))
   return [aln_ref, aln_seq]
 end
 
-#collapse sequences with x number of nt differences. make sure sequences are aligned.
+#collapse sequences with x number of nt differences. make sure sequences are aligned. The return frequency is NOT the frequency of the collasped sequences.
 def collapse_sequence_by_x_nt_difference(seq_array,cutoff)
     new_seq_freq = {}
     seq_freq = count(seq_array)
