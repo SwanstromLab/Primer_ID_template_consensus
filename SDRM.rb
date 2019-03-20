@@ -246,7 +246,7 @@ libs.each do |lib|
     elsif (pi_RT + pi_V1V3) >= 0.0103 and (dist20_RT + dist20_V1V3) >= 0.006
         recency = "chronic"
     else
-        recency = "possible duel"
+        recency = "possible dual"
     end
   elsif tcs_RT >= 3 and tcs_V1V3 < 3
     if pi_RT < 0.0021
@@ -254,7 +254,7 @@ libs.each do |lib|
     elsif pi_RT >= 0.0021 and dist20_RT >= 0.001
       recency = "RT only chronic"
     else
-      recency = "RT only possible duel"
+      recency = "RT only possible dual"
     end
   else
     recency = "? (RT missing)"
