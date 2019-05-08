@@ -2,6 +2,14 @@ require_relative "sequence"
 #SDRM analysis for PR, RT and IN regions.
 #Calculate Pi for recency, require R (3.5.0 and above). List of R packages required: phangorn, ape, ggplot2, scales, ggforce, cowplot, magrittr, gridExtra
 
+# gem install prawn
+# gem install prawn-table
+# gem install csv
+# gem install combine_pdf
+require 'prawn'
+require 'prawn/table'
+require 'csv'
+require 'combine_pdf' 
 
 #require MUSCLE, define path_to_muscle
 $path_to_muscle = "muscle"
@@ -278,6 +286,46 @@ libs.each do |lib|
   end
   line_out.print [tcs_PR.to_s,tcs_RT.to_s,tcs_IN.to_s,tcs_V1V3.to_s,pi_RT.to_s,pi_V1V3.to_s,dist20_RT.to_s,dist20_V1V3.to_s,recency,sdrm_PR,sdrm_RT,sdrm_IN].join(",") + "\n"
   line_out.close
+
+  csvs = {
+    summary: {
+      title: "Summary",
+      file: summary_line_file,
+      newPDF: ""
+    },
+    substitution: {
+      title: "SDRM",
+      file: point_mutation_file,
+      newPDF: ""
+    },
+    linkage: {
+      title: "Mutation Linkage"
+      file: linkage_file,
+      newPDF: ""
+    }
+  }
+
+  csvs.each do |csv|
+    file_name = out_lib_dir + "/" + csv.name + ".pdf"
+    Prawn::Document.generate(file_name) do |pdf|
+      pdf.text(csv.title)
+      table_data = CSV.open(csv.file).each.to_a
+      pdf.table(table_data,:width => 500)
+    end
+    csv.newPDF = file_name
+  end
+
+  pdf = CombinePDF.new
+  csvs.each do |csv|
+    pdf << CombinePDF.load(csv.file)
+  end
+  pdf << CombinePDF.load(lib_name + "_pi.pdf")
+
+  pdf.save out_lib_dir + "/" + lib_name + ".pdf"
+
+  csvs.each do |csv|
+    `rm #{csv.newPDF}`
+  end
 end
 
 `touch #{outdir}/.done`
