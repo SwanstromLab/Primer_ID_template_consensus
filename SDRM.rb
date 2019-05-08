@@ -9,7 +9,7 @@ require_relative "sequence"
 require 'prawn'
 require 'prawn/table'
 require 'csv'
-require 'combine_pdf' 
+require 'combine_pdf'
 
 #require MUSCLE, define path_to_muscle
 $path_to_muscle = "muscle"
@@ -163,6 +163,9 @@ libs.each do |lib|
 
   filtered_seq_files = Dir[filtered_seq_dir + "/*"]
 
+  out_r_csv = out_lib_dir + "/" + lib_name + "_pi.csv"
+  out_r_pdf = out_lib_dir + "/" + lib_name + "_pi.pdf"
+
   if filtered_seq_files.size > 0
 
     temp_sampled_seq_dir = out_lib_dir + "/" + lib_name + "_temp_seq"
@@ -186,8 +189,6 @@ libs.each do |lib|
     end
 
     r_script.gsub!(/PATH_TO_FASTA/,aln_seq_dir)
-    out_r_csv = out_lib_dir + "/" + lib_name + "_pi.csv"
-    out_r_pdf = out_lib_dir + "/" + lib_name + "_pi.pdf"
     File.unlink(out_r_csv) if File.exist?(out_r_csv)
     File.unlink(out_r_pdf) if File.exist?(out_r_pdf)
     r_script.gsub!(/OUTPUT_CSV/,out_r_csv)
@@ -291,7 +292,7 @@ libs.each do |lib|
     {
       name: "summary",
       title: "Summary",
-      file: summary_line_file,
+      file: seq_summary_file,
       newPDF: ""
     },
     {
@@ -302,32 +303,37 @@ libs.each do |lib|
     },
     {
       name: "linkage",
-      title: "Mutation Linkage"
+      title: "Mutation Linkage",
       file: linkage_file,
       newPDF: ""
     }
   ]
 
   csvs.each do |csv|
-    file_name = out_lib_dir + "/" + csv.name + ".pdf"
-    Prawn::Document.generate(file_name) do |pdf|
-      pdf.text(csv.title)
-      table_data = CSV.open(csv.file).each.to_a
-      pdf.table(table_data,:width => 500)
+    file_name = out_lib_dir + "/" + csv[:name] + ".pdf"
+    next unless File.exist? csv[:file]
+    Prawn::Document.generate(file_name, :page_layout => :landscape) do |pdf|
+      pdf.text((File.basename(lib, ".*") + ': ' + csv[:title]), :size => 16, :leading => 10)
+      table_data = CSV.open(csv[:file]).to_a
+      header = table_data.first
+      pdf.table(table_data, :header => header, :position => :center)
     end
-    csv.newPDF = file_name
+    csv[:newPDF] = file_name
   end
 
   pdf = CombinePDF.new
   csvs.each do |csv|
-    pdf << CombinePDF.load(csv.newPDF)
+    next unless File.exist? (csv[:newPDF])
+    pdf << CombinePDF.load(csv[:newPDF])
   end
-  pdf << CombinePDF.load(out_lib_dir + "/" + lib_name + "_pi.pdf")
+  if File.exist?(out_r_pdf)
+    pdf << CombinePDF.load(out_r_pdf)
+  end
 
   pdf.save out_lib_dir + "/" + lib_name + ".pdf"
 
   csvs.each do |csv|
-    `rm #{csv.newPDF}`
+    `rm #{csv[:newPDF]}`
   end
 end
 

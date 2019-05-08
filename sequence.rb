@@ -2354,7 +2354,7 @@ def r_binom_CI(x= 0, n= 0,temp_r_dir = File.dirname($0))
   low = lines[0].chomp[4..-1].to_f
   high = lines[1].chomp[4..-1].to_f
   File.unlink(temp_r_result)
-  return [low, high]
+  return [low.round(5), high.round(5)]
 end
 
 #input sequence hash, and Poisson cutoff for minority variants.
@@ -2393,7 +2393,7 @@ def sdrm_pr_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     count_mut_list.each do |m,number|
       ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
-      point_mutation_list << [region, n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
+      point_mutation_list << [region, n_seq, position, wt, m, number, (number/n_seq.to_f).round(5), ci[0], ci[1], label]
     end
   end
   point_mutation_list.sort_by! {|record| record[2]}
@@ -2415,7 +2415,7 @@ def sdrm_pr_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
   link2.sort_by{|_key,value|value}.reverse.to_h.each do |k,v|
     ci = r_binom_CI(v, n_seq, temp_r_dir)
     label = v < cutoff ? "*" : ""
-    linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
+    linkage_list << [region, n_seq, k, v, (v/n_seq.to_f).round(5), ci[0], ci[1], label]
   end
 
   report_list = []
@@ -2505,7 +2505,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     count_mut_list.each do |m,number|
       ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
-      point_mutation_list << ["NRTI", n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
+      point_mutation_list << ["NRTI", n_seq, position, wt, m, number, (number/n_seq.to_f).round(5), ci[0], ci[1], label]
     end
   end
 
@@ -2516,7 +2516,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     count_mut_list.each do |m,number|
       ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
-      point_mutation_list << ["NNRTI", n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
+      point_mutation_list << ["NNRTI", n_seq, position, wt, m, number, (number/n_seq.to_f).round(5), ci[0], ci[1], label]
     end
   end
   point_mutation_list.sort_by! {|record| record[2]}
@@ -2538,7 +2538,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
   link2.sort_by{|_key,value|value}.reverse.to_h.each do |k,v|
     ci = r_binom_CI(v, n_seq, temp_r_dir)
     label = v < cutoff ? "*" : ""
-    linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
+    linkage_list << [region, n_seq, k, v, (v/n_seq.to_f).round(5), ci[0], ci[1], label]
   end
 
   report_list = []
@@ -2619,7 +2619,7 @@ def sdrm_in_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     count_mut_list.each do |m,number|
       ci = r_binom_CI(number, n_seq, temp_r_dir)
       label = number < cutoff ? "*" : ""
-      point_mutation_list << [region, n_seq, position, wt, m, number, number/n_seq.to_f.round(8), ci[0], ci[1], label]
+      point_mutation_list << [region, n_seq, position, wt, m, number, (number/n_seq.to_f).round(5), ci[0], ci[1], label]
     end
   end
   point_mutation_list.sort_by! {|record| record[2]}
@@ -2641,7 +2641,7 @@ def sdrm_in_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
   link2.sort_by{|_key,value|value}.reverse.to_h.each do |k,v|
     ci = r_binom_CI(v, n_seq, temp_r_dir)
     label = v < cutoff ? "*" : ""
-    linkage_list << [region, n_seq, k, v, v/n_seq.to_f.round(8), ci[0], ci[1], label]
+    linkage_list << [region, n_seq, k, v, (v/n_seq.to_f).round(5), ci[0], ci[1], label]
   end
 
   report_list = []
