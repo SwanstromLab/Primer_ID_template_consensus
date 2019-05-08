@@ -2746,3 +2746,194 @@ def gap_strip(sequence_alignment)
   end
   return new_seq_hash
 end
+
+# gap strip from a sequence alignment, only strip the gaps at the ends of the alignment
+
+def gap_strip_ends(sequence_alignment)
+  new_seq_hash = {}
+  seq_size = sequence_alignment.values[0].size
+  seq_matrix = {}
+  (0..(seq_size - 1)).each do |p|
+    seq_matrix[p] = []
+    sequence_alignment.values.each do |s|
+      seq_matrix[p] << s[p]
+    end
+  end
+  n1 = 0
+  n2 = 0
+  seq_matrix.each do |p, list|
+    if list.include?("-")
+      n1 += 1
+    else
+      break
+    end
+  end
+
+  seq_matrix.keys.reverse.each do |p|
+    list = seq_matrix[p]
+    if list.include?("-")
+      n2 += 1
+    else
+      break
+    end
+  end
+
+  sequence_alignment.each do |n,s|
+    new_s = s[n1..(- n2 - 1)]
+    new_seq_hash[n] = new_s
+  end
+  return new_seq_hash
+end
+
+# return taxa names from a NWK tree, input is a nwk tree string
+
+def taxa_name_nwk(nwk_line)
+  taxa = []
+  nwk_line.tr("()","").split(",").each {|n| taxa << n.split(":")[0].tr("\'","")}
+  return taxa
+end
+
+
+# input paired-end sequence hash format seq_name => [r1_seq, r2_seq]
+# overlap is pre-determined
+def join_pid_seq_overlap(seq_pair_hash, diff = 0.0, overlap)
+  joined_seq_hash = {}
+  seq_pair_hash.each do |seq_name, seq_pair|
+    r1_seq = seq_pair[0]
+    r2_seq = seq_pair[1]
+    if overlap.zero?
+      joined_seq_hash[seq_name] = r1_seq + r2_seq
+    elsif compare_two_seq(r1_seq[-overlap..-1], r2_seq[0,overlap]) <= (overlap * diff)
+      joined_seq_hash[seq_name] = r1_seq + r2_seq[overlap..-1]
+    else
+      next
+    end
+  end
+  return joined_seq_hash
+end
+
+
+# overlap is not predetermined
+# model 1: overlap is determined based on consensus, all sequence pairs are supposed to have the same overlap size
+# model 2: overlap is determined for each sequence pair, sequence pairs can have different size of overlap
+def join_pid_seq_no_overlap(seq_pair_hash, diff = 0.0, model = 1)
+  begin
+    if model == 1
+      overlap = determine_overlap_pid_pair(seq_pair_hash, diff)
+      return join_pid_seq_overlap(seq_pair_hash, diff, overlap)
+    elsif model == 2
+      joined_seq_hash = {}
+      seq_pair_hash.each do |seq_name, seq_pair|
+        overlap_list = []
+        overlap_matrix(seq_pair[0], seq_pair[1]).each do |overlap1, diff_nt|
+          cut_off_base = overlap1 * diff
+          overlap_list << overlap1 if diff_nt <= cut_off_base
+        end
+        if overlap_list.empty?
+          joined_seq_hash[seq_name] = seq_pair[0] + seq_pair[1]
+        else
+          overlap = overlap_list.max
+          joined_seq_hash[seq_name] = seq_pair[0] + seq_pair[1][overlap..-1]
+        end
+      end
+      return joined_seq_hash
+    else
+      raise ArgumentError.new("Error::Wrong Overlap Model Argument. Given \'#{model}\', expected '1' or '2'.")
+    end
+  rescue ArgumentError => e
+    puts e
+  end
+end
+
+
+def determine_overlap_pid_pair(seq_pair_hash, diff = 0.0)
+  overlaps = []
+  seq_pair_hash.each do |_seq_name, seq_pair|
+    overlap_list = []
+    matrix = overlap_matrix(seq_pair[0], seq_pair[1])
+    matrix.each do |overlap, diff_nt|
+      cut_off_base = overlap * diff
+      overlap_list << overlap if diff_nt <= cut_off_base
+    end
+    if overlap_list.empty?
+      overlaps << 0
+    else
+      overlaps << overlap_list.max
+    end
+  end
+  count_overlaps = count(overlaps)
+  max_value = count_overlaps.values.max
+  max_overlap_list = []
+  count_overlaps.each {|overlap, counts| max_overlap_list << overlap if counts == max_value}
+  max_overlap_list.max
+end
+
+
+def overlap_matrix(sequence1, sequence2)
+  min_overlap = 6
+  max_overlap = [sequence1.size, sequence2.size].max
+  matrix_hash = {}
+  (min_overlap..max_overlap).each do |overlap|
+    matrix_hash[overlap] = compare_two_seq(sequence1[-overlap..-1], sequence2[0, overlap])
+  end
+  return matrix_hash
+end
+
+# input a directory with r1 and r2 sequences, return a hash :seq_name => [r1_seq, r2_seq]
+# r1 and r2 file names should contain "r1" and "r2" respectively
+# the sequence taxa should only differ by last 3 characters to distinguish r1 and r2 sequence.
+def pair_fasta_to_hash(indir)
+  files = Dir[indir + "/*"]
+  r1_file = ""
+  r2_file = ""
+  files.each do |f|
+    if File.basename(f) =~ /r1/
+      r1_file = f
+    elsif File.basename(f) =~ /r2/
+      r2_file = f
+    end
+  end
+
+  seq1 = fasta_to_hash(r1_file)
+  seq2 = fasta_to_hash(r2_file)
+
+  new_seq1 = seq1.each_with_object({}) {|(k, v), h| h[k[0..-4]] = v}
+  new_seq2 = seq2.each_with_object({}) {|(k, v), h| h[k[0..-4]] = v}
+
+  seq_pair_hash = {}
+
+  new_seq1.each do |seq_name,seq|
+    seq_pair_hash[seq_name] = [seq, new_seq2[seq_name]]
+  end
+  return seq_pair_hash
+end
+
+# batch quality check of HIV sequences based on :sequence_locator
+# input a sequence hash, start nt position(s) in an array, end nt position(s) in a array
+# and allow the sequence to contain indels
+# return a hash of filtered sequences
+
+def qc_hiv_seq_check(seq_hash, start_nt, end_nt, indel=true)
+  seq_hash_unique = seq_hash.values.uniq
+  seq_hash_unique_pass = []
+  seq_hash_unique.each do |seq|
+    loc = sequence_locator(seq)
+    if start_nt.include?(loc[0]) && end_nt.include?(loc[1])
+      if indel
+        seq_hash_unique_pass << seq
+      elsif loc[3] == nil
+        seq_hash_unique_pass << seq
+      end
+    end
+  end
+  seq_pass = {}
+  seq_hash_unique_pass.each do |seq|
+    seq_hash.each do |seq_name, orginal_seq|
+      if orginal_seq == seq
+        seq_pass[seq_name] =  seq
+        seq_hash.delete(seq_name)
+      end
+    end
+  end
+  return seq_pass
+end
