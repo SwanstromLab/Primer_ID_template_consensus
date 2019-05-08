@@ -287,23 +287,26 @@ libs.each do |lib|
   line_out.print [tcs_PR.to_s,tcs_RT.to_s,tcs_IN.to_s,tcs_V1V3.to_s,pi_RT.to_s,pi_V1V3.to_s,dist20_RT.to_s,dist20_V1V3.to_s,recency,sdrm_PR,sdrm_RT,sdrm_IN].join(",") + "\n"
   line_out.close
 
-  csvs = {
-    summary: {
+  csvs = [
+    {
+      name: "summary",
       title: "Summary",
       file: summary_line_file,
       newPDF: ""
     },
-    substitution: {
+    {
+      name: "substitution",
       title: "SDRM",
       file: point_mutation_file,
       newPDF: ""
     },
-    linkage: {
+    {
+      name: "linkage",
       title: "Mutation Linkage"
       file: linkage_file,
       newPDF: ""
     }
-  }
+  ]
 
   csvs.each do |csv|
     file_name = out_lib_dir + "/" + csv.name + ".pdf"
@@ -317,9 +320,9 @@ libs.each do |lib|
 
   pdf = CombinePDF.new
   csvs.each do |csv|
-    pdf << CombinePDF.load(csv.file)
+    pdf << CombinePDF.load(csv.newPDF)
   end
-  pdf << CombinePDF.load(lib_name + "_pi.pdf")
+  pdf << CombinePDF.load(out_lib_dir + "/" + lib_name + "_pi.pdf")
 
   pdf.save out_lib_dir + "/" + lib_name + ".pdf"
 
