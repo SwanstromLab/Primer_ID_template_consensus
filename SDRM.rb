@@ -1,3 +1,4 @@
+$sdrm_version_number = "0.30-09MAY2019"
 require_relative "sequence"
 #SDRM analysis for PR, RT and IN regions.
 #Calculate Pi for recency, require R (3.5.0 and above). List of R packages required: phangorn, ape, ggplot2, scales, ggforce, cowplot, magrittr, gridExtra
@@ -23,7 +24,7 @@ library(ggforce)
 library(cowplot)
 library(magrittr)
 library(gridExtra)
-pdf("OUTPUT_PDF", onefile=T, width=6, height=4)
+pdf("OUTPUT_PDF", onefile=T, width=11, height=8.5)
 fileNames <- list.files()
 for (fileName in fileNames) {
 dna <- read.dna(fileName, format="fasta")
@@ -293,19 +294,25 @@ libs.each do |lib|
       name: "summary",
       title: "Summary",
       file: seq_summary_file,
-      newPDF: ""
+      newPDF: "",
+      table_width: [65,55,110,110,110,110,60,60],
+      extra_text: ""
     },
     {
       name: "substitution",
-      title: "SDRM",
+      title: "Surveillance Drug Resistance Mutations",
       file: point_mutation_file,
-      newPDF: ""
+      newPDF: "",
+      table_width: [65,55,85,80,60,65,85,85,85,45],
+      extra_text: "* Mutation below Poisson cut-off for minority mutations"
     },
     {
       name: "linkage",
       title: "Mutation Linkage",
       file: linkage_file,
-      newPDF: ""
+      newPDF: "",
+      table_width: [55,50,250,60,80,80,80,45],
+      extra_text: "* Mutation below Poisson cut-off for minority mutations"
     }
   ]
 
@@ -313,27 +320,42 @@ libs.each do |lib|
     file_name = out_lib_dir + "/" + csv[:name] + ".pdf"
     next unless File.exist? csv[:file]
     Prawn::Document.generate(file_name, :page_layout => :landscape) do |pdf|
-      pdf.text((File.basename(lib, ".*") + ': ' + csv[:title]), :size => 16, :leading => 10)
+      pdf.text((File.basename(lib, ".*") + ': ' + csv[:title]),
+      :size => 20,
+      :align => :center,
+      :style => :bold)
+      pdf.move_down 20
       table_data = CSV.open(csv[:file]).to_a
       header = table_data.first
-      pdf.table(table_data, :header => header, :position => :center)
+      pdf.table(table_data,
+        :header => header,
+        :position => :center,
+        :column_widths => csv[:table_width],
+        :row_colors => ["B6B6B6", "FFFFFF"],
+        :cell_style => {:align => :center, :size => 10}) do |table|
+        table.row(0).style :font_style => :bold, :size => 12 #, :background_color => 'ff00ff'
+      end
+      pdf.move_down 5
+      pdf.text(csv[:extra_text], :size => 8, :align => :justify,)
     end
     csv[:newPDF] = file_name
   end
 
   pdf = CombinePDF.new
   csvs.each do |csv|
-    next unless File.exist? (csv[:newPDF])
-    pdf << CombinePDF.load(csv[:newPDF])
+    pdf << CombinePDF.load(csv[:newPDF]) if File.exist?(csv[:newPDF])
   end
-  if File.exist?(out_r_pdf)
-    pdf << CombinePDF.load(out_r_pdf)
-  end
+  pdf << CombinePDF.load(out_r_pdf) if File.exist?(out_r_pdf)
+
+  pdf.number_pages location: [:bottom_right],
+  number_format: "Swanstrom\'s lab HIV SDRM Pipeline, version #{$sdrm_version_number} by S.Z. and M.U.C.   Page %s",
+  font_size: 6,
+  opacity: 0.5
 
   pdf.save out_lib_dir + "/" + lib_name + ".pdf"
 
   csvs.each do |csv|
-    `rm #{csv[:newPDF]}`
+    File.unlink csv[:newPDF]
   end
 end
 
