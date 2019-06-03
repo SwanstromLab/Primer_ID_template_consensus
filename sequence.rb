@@ -1520,6 +1520,8 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
         indel = true
     elsif aln_test.include?("-")
         indel = true
+    else
+        indel = false
     end
     return [loc_p1,loc_p2,similarity,indel,aln_test,ref]
   else
@@ -2906,12 +2908,14 @@ end
 def qc_hiv_seq_check(seq_hash, start_nt, end_nt, indel=true)
   seq_hash_unique = seq_hash.values.uniq
   seq_hash_unique_pass = []
+  start_nt = start_nt..start_nt if start_nt.is_a?(Integer)
+  end_nt = end_nt..end_nt if end_nt.is_a?(Integer)
   seq_hash_unique.each do |seq|
     loc = sequence_locator(seq)
     if start_nt.include?(loc[0]) && end_nt.include?(loc[1])
       if indel
         seq_hash_unique_pass << seq
-      elsif loc[3] == nil
+      elsif loc[3] == false
         seq_hash_unique_pass << seq
       end
     end
