@@ -2467,7 +2467,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
     aa_seq = s.aa_array
 
     r1_aa[name] = aa_seq[0,89].join("")
-    r2_aa[name] = aa_seq[85..-1].join("")
+    r2_aa[name] = aa_seq[-85..-1].join("")
     nrti = sdrm_nrti(aa_seq,start_codon_number)
     nnrti = sdrm_nnrti(aa_seq,start_codon_number)
     mut_com << (nrti.merge(nnrti))
@@ -2548,7 +2548,7 @@ def sdrm_rt_bulk(sequences, cutoff = 0, temp_r_dir = File.dirname($0))
       aas << r1[p]
     end
     count_aas = count(aas)
-    div_aa[r1_aa_start] = count_aas.sort_by{|k,v|v}.reverse.to_h
+    div_aa[r1_aa_start] = count_aas.sort_by{|_k,v|v}.reverse.to_h
     r1_aa_start += 1
   end
 
