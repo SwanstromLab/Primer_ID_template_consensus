@@ -1341,46 +1341,7 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
   temp_in.puts seq
   temp_in.close
 
-  print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
-  aln_seq = fasta_to_hash(temp_aln)
-  aln_test = aln_seq[name]
-  aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
-  gap_begin = $1.size
-  gap_end = $3.size
-  aln_test2 = $2
-  ref = aln_seq[">ref"]
-  ref = ref[gap_begin..(-gap_end-1)]
-  ref_size = ref.size
-  if ref_size > 1.3*(seq.size)
-    l1 = l1 + gap_begin
-    l2 = l2 + gap_end
-    max_seq = aln_test2.scan(/[ACGT]+/).max_by(&:length)
-    aln_test2 =~ /#{max_seq}/
-    before_aln_seq = $`
-    before_aln = $`.size
-    post_aln_seq = $'
-    post_aln = $'.size
-    before_aln_seq_size = before_aln_seq.scan(/[ACGT]+/).join("").size
-    b1 = (1.3 * before_aln_seq_size).to_i
-    post_aln_seq_size = post_aln_seq.scan(/[ACGT]+/).join("").size
-    b2 = (1.3 * post_aln_seq_size).to_i
-    if (before_aln > seq.size) and (post_aln <= seq.size)
-      ref = ref[(before_aln - b1)..(ref_size - post_aln - 1)]
-      l1 = l1 + (before_aln - b1)
-    elsif (post_aln > seq.size) and (before_aln <= seq.size)
-      ref = ref[before_aln..(ref_size - post_aln - 1 + b2)]
-      l2 = l2 + post_aln - b2
-    elsif (post_aln > seq.size) and (before_aln > seq.size)
-      ref = ref[(before_aln - b1)..(ref_size - post_aln - 1 + b2)]
-      l1 = l1 + (before_aln - b1)
-      l2 = l2 + (post_aln - b2)
-    end
-    temp_in = File.open(temp_file,"w")
-    temp_in.puts ">ref"
-    temp_in.puts ref
-    temp_in.puts name
-    temp_in.puts seq
-    temp_in.close
+  begin
     print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
     aln_seq = fasta_to_hash(temp_aln)
     aln_test = aln_seq[name]
@@ -1391,57 +1352,47 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     ref = aln_seq[">ref"]
     ref = ref[gap_begin..(-gap_end-1)]
     ref_size = ref.size
-  end
-  aln_seq = fasta_to_hash(temp_aln)
-  aln_test = aln_seq[name]
-  aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
-  gap_begin = $1.size
-  gap_end = $3.size
-  aln_test = $2
-  aln_test =~ /^(\w+)(\-*)\w/
-  s1 = $1.size
-  g1 = $2.size
-  aln_test =~ /\w(\-*)(\w+)$/
-  s2 = $2.size
-  g2 = $1.size
-  ref = aln_seq[">ref"]
-  ref = ref[gap_begin..(-gap_end-1)]
-
-  l1 = l1 + gap_begin
-  l2 = l2 + gap_end
-  repeat = 0
-
-  if g1 == g2 and (s1 + g1 + s2) == ref.size
-    if s1 > s2 and g2 > 2*s2
-      ref = ref[0..(-g2-1)]
-      repeat = 1
-      l2 = l2 + g2
-    elsif s1 < s2 and g1 > 2*s1
-      ref = ref[g1..-1]
-      repeat = 1
-      l1 = l1 + g1
+    if ref_size > 1.3*(seq.size)
+      l1 = l1 + gap_begin
+      l2 = l2 + gap_end
+      max_seq = aln_test2.scan(/[ACGT]+/).max_by(&:length)
+      aln_test2 =~ /#{max_seq}/
+      before_aln_seq = $`
+      before_aln = $`.size
+      post_aln_seq = $'
+      post_aln = $'.size
+      before_aln_seq_size = before_aln_seq.scan(/[ACGT]+/).join("").size
+      b1 = (1.3 * before_aln_seq_size).to_i
+      post_aln_seq_size = post_aln_seq.scan(/[ACGT]+/).join("").size
+      b2 = (1.3 * post_aln_seq_size).to_i
+      if (before_aln > seq.size) and (post_aln <= seq.size)
+        ref = ref[(before_aln - b1)..(ref_size - post_aln - 1)]
+        l1 = l1 + (before_aln - b1)
+      elsif (post_aln > seq.size) and (before_aln <= seq.size)
+        ref = ref[before_aln..(ref_size - post_aln - 1 + b2)]
+        l2 = l2 + post_aln - b2
+      elsif (post_aln > seq.size) and (before_aln > seq.size)
+        ref = ref[(before_aln - b1)..(ref_size - post_aln - 1 + b2)]
+        l1 = l1 + (before_aln - b1)
+        l2 = l2 + (post_aln - b2)
+      end
+      temp_in = File.open(temp_file,"w")
+      temp_in.puts ">ref"
+      temp_in.puts ref
+      temp_in.puts name
+      temp_in.puts seq
+      temp_in.close
+      print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+      aln_seq = fasta_to_hash(temp_aln)
+      aln_test = aln_seq[name]
+      aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
+      gap_begin = $1.size
+      gap_end = $3.size
+      aln_test2 = $2
+      ref = aln_seq[">ref"]
+      ref = ref[gap_begin..(-gap_end-1)]
+      ref_size = ref.size
     end
-  else
-    if g1 > 2*s1
-      ref = ref[g1..-1]
-      repeat = 1
-      l1 = l1 + g1
-    end
-    if g2 > 2*s2
-      ref = ref[0..(-g2 - 1)]
-      repeat = 1
-      l2 = l2 + g2
-    end
-  end
-
-  while repeat == 1
-    temp_in = File.open(temp_file,"w")
-    temp_in.puts ">ref"
-    temp_in.puts ref
-    temp_in.puts name
-    temp_in.puts seq
-    temp_in.close
-    print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
     aln_seq = fasta_to_hash(temp_aln)
     aln_test = aln_seq[name]
     aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
@@ -1456,43 +1407,72 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     g2 = $1.size
     ref = aln_seq[">ref"]
     ref = ref[gap_begin..(-gap_end-1)]
+
     l1 = l1 + gap_begin
     l2 = l2 + gap_end
     repeat = 0
-    if g1 > 2*s1
-      ref = ref[g1..-1]
-      repeat = 1
-      l1 = l1 + g1
+
+    if g1 == g2 and (s1 + g1 + s2) == ref.size
+      if s1 > s2 and g2 > 2*s2
+        ref = ref[0..(-g2-1)]
+        repeat = 1
+        l2 = l2 + g2
+      elsif s1 < s2 and g1 > 2*s1
+        ref = ref[g1..-1]
+        repeat = 1
+        l1 = l1 + g1
+      end
+    else
+      if g1 > 2*s1
+        ref = ref[g1..-1]
+        repeat = 1
+        l1 = l1 + g1
+      end
+      if g2 > 2*s2
+        ref = ref[0..(-g2 - 1)]
+        repeat = 1
+        l2 = l2 + g2
+      end
     end
-    if g2 > 2*s2
-      ref = ref[0..(-g2 - 1)]
-      repeat = 1
-      l2 = l2 + g2
+
+    while repeat == 1
+      temp_in = File.open(temp_file,"w")
+      temp_in.puts ">ref"
+      temp_in.puts ref
+      temp_in.puts name
+      temp_in.puts seq
+      temp_in.close
+      print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+      aln_seq = fasta_to_hash(temp_aln)
+      aln_test = aln_seq[name]
+      aln_test =~ /^(\-*)(\w.*\w)(\-*)$/
+      gap_begin = $1.size
+      gap_end = $3.size
+      aln_test = $2
+      aln_test =~ /^(\w+)(\-*)\w/
+      s1 = $1.size
+      g1 = $2.size
+      aln_test =~ /\w(\-*)(\w+)$/
+      s2 = $2.size
+      g2 = $1.size
+      ref = aln_seq[">ref"]
+      ref = ref[gap_begin..(-gap_end-1)]
+      l1 = l1 + gap_begin
+      l2 = l2 + gap_end
+      repeat = 0
+      if g1 > 2*s1
+        ref = ref[g1..-1]
+        repeat = 1
+        l1 = l1 + g1
+      end
+      if g2 > 2*s2
+        ref = ref[0..(-g2 - 1)]
+        repeat = 1
+        l2 = l2 + g2
+      end
     end
-  end
-  ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
-
-  temp_in = File.open(temp_file,"w")
-  temp_in.puts ">ref"
-  temp_in.puts ref
-  temp_in.puts name
-  temp_in.puts seq
-  temp_in.close
-  print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
-  aln_seq = fasta_to_hash(temp_aln)
-  aln_test = aln_seq[name]
-  ref = aln_seq[">ref"]
-
-  #refine alignment
-
-  if ref =~ /^(\-+)/
-    l1 = l1 - $1.size
-  elsif ref =~ /(\-+)$/
-    l2 = l2 + $1.size
-  end
-
-  if (hxb2_l - l2 - 1) >= l1
     ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
+
     temp_in = File.open(temp_file,"w")
     temp_in.puts ">ref"
     temp_in.puts ref
@@ -1504,27 +1484,53 @@ def sequence_locator(seq="",temp_dir=File.dirname($0))
     aln_test = aln_seq[name]
     ref = aln_seq[">ref"]
 
-    ref_size = ref.size
-    sim_count = 0
-    (0..(ref_size-1)).each do |n|
-      ref_base = ref[n]
-      test_base = aln_test[n]
-      sim_count += 1 if ref_base == test_base
+    #refine alignment
+
+    if ref =~ /^(\-+)/
+      l1 = l1 - $1.size
+    elsif ref =~ /(\-+)$/
+      l2 = l2 + $1.size
     end
-    similarity = (sim_count/ref_size.to_f*100).round(1)
+
+    if (hxb2_l - l2 - 1) >= l1
+      ref = hxb2_ref[l1..(hxb2_l - l2 - 1)]
+      temp_in = File.open(temp_file,"w")
+      temp_in.puts ">ref"
+      temp_in.puts ref
+      temp_in.puts name
+      temp_in.puts seq
+      temp_in.close
+      print `muscle -in #{temp_file} -out #{temp_aln} -quiet`
+      aln_seq = fasta_to_hash(temp_aln)
+      aln_test = aln_seq[name]
+      ref = aln_seq[">ref"]
+
+      ref_size = ref.size
+      sim_count = 0
+      (0..(ref_size-1)).each do |n|
+        ref_base = ref[n]
+        test_base = aln_test[n]
+        sim_count += 1 if ref_base == test_base
+      end
+      similarity = (sim_count/ref_size.to_f*100).round(1)
+      print `rm -f #{temp_file}`
+      print `rm -f #{temp_aln}`
+      loc_p1 = l1 + 1
+      loc_p2 = hxb2_l - l2
+      if seq.size != (loc_p2 - loc_p1 + 1)
+          indel = true
+      elsif aln_test.include?("-")
+          indel = true
+      else
+          indel = false
+      end
+      return [loc_p1,loc_p2,similarity,indel,aln_test,ref]
+    else
+      return [0,0,0,0,0,0,0]
+    end
+  rescue
     print `rm -f #{temp_file}`
     print `rm -f #{temp_aln}`
-    loc_p1 = l1 + 1
-    loc_p2 = hxb2_l - l2
-    if seq.size != (loc_p2 - loc_p1 + 1)
-        indel = true
-    elsif aln_test.include?("-")
-        indel = true
-    else
-        indel = false
-    end
-    return [loc_p1,loc_p2,similarity,indel,aln_test,ref]
-  else
     return [0,0,0,0,0,0,0]
   end
 end
@@ -2051,6 +2057,7 @@ control pattern: G[YN|RC] -> A[YN|RC]
 =end
 
 def apobec3gf(seq = "")
+  seq.tr!("-", "")
   seq_length = seq.size
   apobec_position = []
   control_position = []
@@ -2266,28 +2273,30 @@ def a3g_hypermut_seq_hash(seq_hash)
     end
   end
 
-  rate = total.to_f/(seq_hash.size)
+  if seq_hash.size > 20
+    rate = total.to_f/(seq_hash.size)
 
-  count_mut = count(mut_hash.values)
-  maxi_count = count_mut.values.max
+    count_mut = count(mut_hash.values)
+    maxi_count = count_mut.values.max
 
-  poisson_hash = poisson_distribution(rate,maxi_count)
+    poisson_hash = poisson_distribution(rate,maxi_count)
 
-  cut_off = 0
-  poisson_hash.each do |k,v|
-    cal = seq_hash.size * v
-    obs = count_mut[k]
-    if obs >= 20 * cal
-      cut_off = k
-      break
-    elsif k == maxi_count
-      cut_off = maxi_count
+    cut_off = 0
+    poisson_hash.each do |k,v|
+      cal = seq_hash.size * v
+      obs = count_mut[k]
+      if obs >= 20 * cal
+        cut_off = k
+        break
+      elsif k == maxi_count
+        cut_off = maxi_count
+      end
     end
-  end
 
-  mut_hash.each do |k,v|
-    if v > cut_off
-      hm_hash[k] = out_hash[k]
+    mut_hash.each do |k,v|
+      if v > cut_off
+        hm_hash[k] = out_hash[k]
+      end
     end
   end
 
@@ -2862,7 +2871,7 @@ end
 
 
 def overlap_matrix(sequence1, sequence2)
-  min_overlap = 6
+  min_overlap = 4
   max_overlap = [sequence1.size, sequence2.size].max
   matrix_hash = {}
   (min_overlap..max_overlap).each do |overlap|
