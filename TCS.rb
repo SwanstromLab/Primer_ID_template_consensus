@@ -1,5 +1,5 @@
 =begin
-TCS Pipeline Version 1.38-07AUG2018
+TCS Pipeline Version 1.38-07AUG2018 by Shuntai Zhou
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
