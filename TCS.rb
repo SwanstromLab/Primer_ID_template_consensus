@@ -1,12 +1,12 @@
 =begin
-TCS Pipeline Version 1.38-07AUG2018
+TCS Pipeline Version 1.3.8-07AUG2018 by Shuntai Zhou
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.38-07AUG2018"
+ver = "1.3.8-07AUG2018"
 #############Patch Note#############
 =begin
   1. Improved performace.

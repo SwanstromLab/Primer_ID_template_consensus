@@ -1,7 +1,9 @@
-$sdrm_version_number = "0.30-09MAY2019"
+$sdrm_version_number = "0.3.0"
 require_relative "sequence"
-#SDRM analysis for PR, RT and IN regions.
-#Calculate Pi for recency, require R (3.5.0 and above). List of R packages required: phangorn, ape, ggplot2, scales, ggforce, cowplot, magrittr, gridExtra
+
+# Version 0.3.0-09MAY2019 by Shuntai Zhou
+# SDRM analysis for PR, RT and IN regions.
+# Calculate Pi for recency, require R (3.5.0 and above). List of R packages required: phangorn, ape, ggplot2, scales, ggforce, cowplot, magrittr, gridExtra
 
 # gem install prawn
 # gem install prawn-table
