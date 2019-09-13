@@ -1,5 +1,5 @@
 $sdrm_version_number = "0.3.0"
-require_relative "sequence"
+require_relative "viral_seq"
 
 # Version 0.3.0-09MAY2019 by Shuntai Zhou
 # SDRM analysis for PR, RT and IN regions.
