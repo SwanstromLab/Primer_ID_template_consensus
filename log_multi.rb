@@ -55,7 +55,7 @@ libs.each do |lib|
     r2_file = ""
     combined_file = ""
     dir3 = dir2 + "/" + bar + "/consensus"
-    
+
     files = []
     Dir.chdir(dir3) {files = Dir.glob("*")}
     files.each do |f|
@@ -70,7 +70,7 @@ libs.each do |lib|
     end
     r1_file = dir3 + "/" + r1_file
     r2_file = dir3 + "/" + r2_file
-    
+
     r1 = fasta_to_hash(r1_file)
     r2 = fasta_to_hash(r2_file)
     r1_new = {}
@@ -88,7 +88,7 @@ libs.each do |lib|
       r1_new = r1
       r2_new = r2
     end
-    
+
     c1_d1 = outdir1 + "/" + bar
     Dir.mkdir(c1_d1) unless File.directory?(c1_d1)
     c1_d2_r1 = c1_d1 + "/R1"
@@ -109,7 +109,7 @@ libs.each do |lib|
     end
     out1_r1.close
     out1_r2.close
-    
+
     c3_d1 = outdir3 + "/" + bar
     Dir.mkdir(c3_d1) unless File.directory?(c3_d1)
     c3_d2 = c3_d1 + "/" + lib
@@ -128,21 +128,21 @@ libs.each do |lib|
     end
     out1_r1.close
     out1_r2.close
-    
+
     next if combined_file == ""
-    
+
     c2_d1 = outdir2 + "/" + lib
     Dir.mkdir(c2_d1) unless File.directory?(c2_d1)
-    
+
     outdir_bar = outdir4 + "/" + bar
     Dir.mkdir(outdir_bar) unless File.directory?(outdir_bar)
-    
+
     combined_file = dir3 + "/" + combined_file
     path_combined = outdir_bar + "/" + lib + "_" + bar + "_combined"
     path_combined2 = c2_d1 + "/" + lib + "_" + bar
     print `cp #{combined_file} #{path_combined}`
     print `cp #{combined_file} #{path_combined2}`
-   
+
   end
 end
 
@@ -195,10 +195,11 @@ pools.each do |poolname|
     end
     if combined_exist
       (17..19).each do |line|
-         a2 << lines[line].chomp.split("\s")[-1]
+        next unless lines[line]
+        a2 << lines[line].chomp.split("\s")[-1]
       end
     end
-    
+
     a1 << a2
   end
 end
