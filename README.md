@@ -16,6 +16,10 @@
 
 ## Updates
 
+### TCS version 1.3.9-03DEC2019 and DR Version 1.0.10-03DEC2019
+
+  1. bug fix for reading R1 and R2 files
+
 ### DR Version 1.08-10AUG2018
 
 	1. Add rescue for :sequence_locator, in case of rare alignment issues.

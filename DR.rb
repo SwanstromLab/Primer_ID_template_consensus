@@ -1,6 +1,6 @@
 =begin
-DR version 1.09-10SEP2019
-based on TCS Pipeline Version 1.38-07AUG2018 for HIV-1 Multiplexing Drug Resistance Tesing
+DR version 1.0.10-03DEC2019
+based on TCS Pipeline Version 1.3.9-03DEC2019 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, IN, V1/V3, P17
 
@@ -10,10 +10,10 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.09-10SEP2019 based on TCS 1.38-07AUG2018"
+ver = "1.0.10-03DEC2019 based on TCS 1.3.9-03DEC2019"
 #############Patch Note#############
 =begin
-  1. Add P17 region
+  1. bug fix for R1 and R2 files
 =end
 
 
@@ -567,9 +567,16 @@ end
 r1_f = ""
 r2_f = ""
 files.each do |f|
-  if f =~ /r1/i
+  t = f.split("_")
+  if t.size == 1
+    tag = f
+  else
+    tag = f.split("_")[1..-1].join("_")
+  end
+
+  if tag =~ /r1/i
     r1_f = unzip_r(indir, f)
-  elsif f =~ /r2/i
+  elsif tag =~ /r2/i
     r2_f = unzip_r(indir, f)
   end
 end
