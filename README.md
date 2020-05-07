@@ -14,6 +14,10 @@
 
     viral_seq.rb    -viral_seq version 0.1.0. Core functions for TCS/DR pipeline. Latest RubyGem 'viral_seq' at https://rubygems.org/gems/viral_seq/
 
+    end_join.rb     -join paired-end sequence after TCS pipeline. Consensus model is used.
+
+    mut_table.rb    -Use sample sequence consensus as a reference to calculate mutation types and mutation rate. 
+
 ## Updates
 
 ### TCS version 1.3.9-03DEC2019 and DR Version 1.0.10-03DEC2019
