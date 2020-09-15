@@ -16,9 +16,13 @@
 
     end_join.rb     -join paired-end sequence after TCS pipeline. Consensus model is used.
 
-    mut_table.rb    -Use sample sequence consensus as a reference to calculate mutation types and mutation rate. 
+    mut_table.rb    -Use sample sequence consensus as a reference to calculate mutation types and mutation rate.
 
 ## Updates
+
+### TCS version 1.3.10-14SEP2020 and DR Version 1.0.11-15SEP2020
+
+  1. fix another bug for reading R1 and R2 files
 
 ### TCS version 1.3.9-03DEC2019 and DR Version 1.0.10-03DEC2019
 
