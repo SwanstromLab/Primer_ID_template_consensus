@@ -20,6 +20,10 @@
 
 ## Updates
 
+### TCS version 1.3.11-22OCT2020 and DR Version 1.0.12-20OCT2020
+
+  1. fix a bug reading fastq raw sequence files by different MiSeq naming system.
+
 ### TCS version 1.3.10-14SEP2020 and DR Version 1.0.11-15SEP2020
 
   1. fix another bug for reading R1 and R2 files

@@ -1,6 +1,6 @@
 =begin
-DR version 1.0.11-15SEP2020
-based on TCS Pipeline Version 1.3.9-03DEC2019 for HIV-1 Multiplexing Drug Resistance Tesing
+DR version 1.0.12-22OCT2020
+based on TCS Pipeline Version 1.3.11-22OCT2020 for HIV-1 Multiplexing Drug Resistance Tesing
 Regions include
 Protease, RT, IN, V1/V3, P17
 
@@ -10,7 +10,7 @@ Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.0.11-15SEP2020 based on TCS 1.3.10-14SEP2020"
+ver = "1.0.12-22OCT2020 based on TCS 1.3.11-22OCT2020"
 #############Patch Note#############
 =begin
   1. Fix a bug of determing R1 and R2 raw sequence file while the words "R1" and "R2" exists in the sequence name.
@@ -700,15 +700,21 @@ primers.each do |setname,primer_pair|
   sequence_rtag1 = {}
   sequence_rtag2 = {}
 
+  def remove_tag(seq_name)
+    if seq_name =~ /\s/
+      new_tag = $`
+    else
+      new_tag = seq_name[0..-3]
+    end
+  end
+
   filtered_r1_h.each do |k,v|
-    k =~ /\s/
-    k2 = $`
+    k2 = remove_tag(k)
     sequence_rtag1[k2]= v
   end
 
   filtered_r2_h.each do |k,v|
-    k =~ /\s/
-    k2 = $`
+    k2 = remove_tag(k)
     sequence_rtag2[k2]= v
   end
 
@@ -912,6 +918,7 @@ primers.each do |setname,primer_pair|
         r1_uni_pass << k
       end
     when "IN"
+
       next if loc[3]
       if (loc[0] == 4384) and (loc[1] == 4658)
         r1_uni_pass << k
@@ -957,6 +964,7 @@ primers.each do |setname,primer_pair|
 
   end
   r1_pass = {}
+
   r1_uni_pass.each do |seq|
     r1.each do |k,v|
       if v == seq

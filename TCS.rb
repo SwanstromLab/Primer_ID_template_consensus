@@ -1,12 +1,12 @@
 =begin
-TCS Pipeline Version 1.4.0-14SEP2020 by Shuntai Zhou
+TCS Pipeline Version 1.3.11-22OCT2020 by Shuntai Zhou
 Create Primer ID template consensus sequences from raw MiSeq FASTq file
 Input = directory of raw sequences of two ends (R1 and R2 fasta files, unzipped)
 Require parameters:
   list of Primer Sequence of cDNA primer and 1st round PCR forward Primer, including a tag for the pair name
   ignore the first nucleotide of Primer ID: Yes/No
 =end
-ver = "1.3.10-14SEP2020"
+ver = "1.3.11-22OCT2020"
 #############Patch Note#############
 =begin
   1. Fix a bug of determing R1 and R2 raw sequence file while the words "R1" and "R2" exists in the sequence name.
@@ -484,15 +484,21 @@ primers.each do |setname,primer_pair|
   sequence_rtag1 = {}
   sequence_rtag2 = {}
 
+  def remove_tag(seq_name)
+    if seq_name =~ /\s/
+      new_tag = $`
+    else
+      new_tag = seq_name[0..-3]
+    end
+  end
+
   filtered_r1_h.each do |k,v|
-    k =~ /\s/
-    k2 = $`
+    k2 = remove_tag(k)
     sequence_rtag1[k2]= v
   end
 
   filtered_r2_h.each do |k,v|
-    k =~ /\s/
-    k2 = $`
+    k2 = remove_tag(k)
     sequence_rtag2[k2]= v
   end
 
