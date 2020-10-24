@@ -567,7 +567,7 @@ end
 r1_f = ""
 r2_f = ""
 files.each do |f|
-  t = File.basename(f, ".*").split("_")
+  t = f.split(".")[0].split("_")
   if t.size == 1
     tag = [ t[0].upcase ]
   else
